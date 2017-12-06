@@ -39,7 +39,7 @@ void  Tintin_reporter::error(std::string str){
 void  Tintin_reporter::write(std::string errortype, std::string str){
 	if (this->file)
 	{
-		this->file << errortype << " " << str << '\n';
+		this->file << this->getTime() << " [ " << errortype << " ] - " << str << '\n';
 		this->file.flush();
 	}
 }
@@ -53,6 +53,19 @@ Tintin_reporter   &Tintin_reporter::setFilename(std::string fn){
 	this->file = std::ofstream(fullPath, std::ios::out | std::ios::app);
 
 	return *this;
+}
+
+std::string	Tintin_reporter::getTime( void ) {
+
+	time_t rawtime;
+	struct tm * timeinfo;
+	char buffer[80];
+
+	time (&rawtime);
+timeinfo = localtime(&rawtime);
+
+	strftime(buffer,sizeof(buffer),"[%d/%m/%Y-%I:%M:%S]",timeinfo);
+	return std::string(buffer);
 }
 /* NON MEMBER FUNCTIONS ======================================================*/
 

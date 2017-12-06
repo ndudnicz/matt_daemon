@@ -18,6 +18,7 @@
 # include <sys/types.h>
 
 # include <string>
+# include <ctime>
 
 class Tintin_reporter {
 
@@ -41,8 +42,9 @@ public:
 
 private:
 	std::ofstream		file;
-	void write(std::string errortype, std::string str);
-	Tintin_reporter &	operator=( Tintin_reporter const & rhs );
+	void 			write(std::string errortype, std::string str);
+	Tintin_reporter 	&operator=( Tintin_reporter const & rhs );
+	std::string		getTime( void );
 
 };
 
