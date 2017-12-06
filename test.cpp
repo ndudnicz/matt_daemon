@@ -13,27 +13,31 @@
 #include <unistd.h>
 #include <stdlib.h>
 #include <iostream>
+#include <sys/wait.h>
 
 #include "Server.hpp"
+
+void ft(int sig) {
+  std::cout << "Child died!" << '\n';
+}
 
 int	main()
 {
   int  pid = 0;
 
   if (getuid()) {
-    std::cout << "Permission denied. Run as root." << '\n';
+    std::cout << "Permission denied. Run as root." << std::endl;
     exit(1);
   }
+  signal(SIGCHLD, &ft);
   pid = fork();
   if (pid < 0)
-    exit(EXIT_FAILURE);
+    return (EXIT_FAILURE);
   else if (pid == 0) {
     Server  *s = new Server();
-    s->run();
-    while (1);
+    s->masterLoop();
+    return (0);
   } else {
-    exit(0);
+    return (0);
   }
-  std::cout << "return main" << '\n';
-	return 0;
 }

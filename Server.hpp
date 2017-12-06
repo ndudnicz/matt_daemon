@@ -17,6 +17,25 @@
 # define LOG_SIGTERM "SIGTERM"
 # define LOG_SIGUSR1 "SIGUSR1"
 # define LOG_SIGUSR2 "SIGUSR2"
+# define LOG_SIGCHLD "SIGCHLD"
+# define LOG_SIGCONT "SIGCONT"
+# define LOG_SIGTSTP "SIGTSTP"
+# define LOG_SIGTTIN "SIGTTIN"
+# define LOG_SIGTTOU "SIGTTOU"
+
+# define LOG_SIGBUS "SIGBUS"
+# define LOG_SIGUSR2 "SIGUSR2"
+# define LOG_SIGUSR2 "SIGUSR2"
+# define LOG_SIGUSR2 "SIGUSR2"
+# define LOG_SIGUSR2 "SIGUSR2"
+# define LOG_SIGUSR2 "SIGUSR2"
+# define LOG_SIGUSR2 "SIGUSR2"
+# define LOG_SIGUSR2 "SIGUSR2"
+# define LOG_SIGUSR2 "SIGUSR2"
+# define LOG_SIGUSR2 "SIGUSR2"
+# define LOG_SIGUSR2 "SIGUSR2"
+# define LOG_SIGUSR2 "SIGUSR2"
+# define LOG_SIGUSR2 "SIGUSR2"
 
 class Server {
 
@@ -34,7 +53,7 @@ public:
   ~Server( void );
 
   static void  signalHandler( int sig );
-  void  run( void );
+  void  masterLoop( void );
 
   Server &  operator=( Server const & rhs );
 

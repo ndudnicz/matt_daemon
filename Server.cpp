@@ -1,5 +1,7 @@
 #include <iostream>
 #include <signal.h>
+#include <unistd.h>
+#include <sys/types.h>
 
 #include "Server.hpp"
 #include "Tintin_reporter.hpp"
@@ -23,6 +25,12 @@ Server::Server( void ) : reporter( new Tintin_reporter(Server::_LOGNAME) ) {
   signal(SIGTERM, &Server::signalHandler);
   signal(SIGUSR1, &Server::signalHandler);
   signal(SIGUSR2, &Server::signalHandler);
+  signal(SIGCHLD, &Server::signalHandler);
+  signal(SIGCONT, &Server::signalHandler);
+  signal(SIGTSTP, &Server::signalHandler);
+  signal(SIGTTIN, &Server::signalHandler);
+  signal(SIGTTOU, &Server::signalHandler);
+  signal(SIGKILL, &Server::signalHandler);
 }
 
 Server::Server( Server const & src ) {
@@ -38,17 +46,20 @@ Server::~Server( void ) {
 }
 
 /* MEMBER FUNCTIONS ==========================================================*/
-void  Server::run(void) {
-  std::cout << "ruuuun" << std::endl;
+void  Server::masterLoop(void) {
+  // std::cout << "ruuuun" << std::endl;
+
 }
 
 void  Server::signalHandler( int sig ) {
+  int const  ppid = getppid();
+
   switch (sig) {
     case SIGHUP:
       std::cout << LOG_SIGHUP << '\n';
       exit(0);
     case SIGINT:
-      std::cout << LOG_SIGINT << '\n';
+      std::cout << LOG_SIGINT << " pid:" << getpid() << '\n';
       exit(0);
     case SIGQUIT:
       std::cout << LOG_SIGQUIT << '\n';
@@ -76,9 +87,12 @@ void  Server::signalHandler( int sig ) {
       exit(0);
     case SIGUSR1:
       std::cout << LOG_SIGUSR1 << '\n';
-      exit(0);
+      // exit(0);
     case SIGUSR2:
       std::cout << LOG_SIGUSR2 << '\n';
+      exit(0);
+    case SIGKILL:
+      std::cout << "KILLLL" << '\n';
       exit(0);
     default:
       std::cout << "UNKNOWN" << '\n';
