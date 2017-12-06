@@ -13,6 +13,8 @@
 #ifndef Tintin_reporter_HPP
 # define Tintin_reporter_HPP
 
+# include <string>
+
 class Tintin_reporter {
 
 private:

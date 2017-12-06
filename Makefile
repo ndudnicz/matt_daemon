@@ -12,12 +12,13 @@
 
 NAME = Matt_daemon
 
-CXX = clang++
+CXX = g++
 
-FLAGS = -Wall -Wextra -Werror
+FLAGS = -fsanitize=address#-Wall -Wextra #-Werror
 
-SRC = main.cpp \
-	  Tintin_reporter.cpp
+SRC =	main.cpp \
+			Tintin_reporter.cpp \
+			Server.cpp
 
 OBJ = $(SRC:.cpp=.o)
 
