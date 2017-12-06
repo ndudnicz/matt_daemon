@@ -19,6 +19,8 @@
 
 using namespace std;
 
+# include <string>
+
 class Tintin_reporter {
 
 private:

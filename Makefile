@@ -16,8 +16,9 @@ CXX = g++
 
 FLAGS = -Wall
 
-SRC = main.cpp \
-	  Tintin_reporter.cpp
+SRC =	main.cpp \
+			Tintin_reporter.cpp \
+			Server.cpp
 
 OBJ = $(SRC:.cpp=.o)
 

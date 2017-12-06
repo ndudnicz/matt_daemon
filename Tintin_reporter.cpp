@@ -1,3 +1,5 @@
+#include "Tintin_reporter.hpp"
+
 /* STATIC VARIABLES ==========================================================*/
 
 #include "Tintin_reporter.hpp"
