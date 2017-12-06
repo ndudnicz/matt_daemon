@@ -30,9 +30,11 @@ public:
 	void info(std::string	str);
 	void warning(std::string str);
 	void error(std::string str);
+	Tintin_reporter &setFilename(std::string	str);
 
 private:
-	void write(std::string str);
+	std::string	fileName;
+	void write(std::string errortype, std::string str);
 
 };
 
