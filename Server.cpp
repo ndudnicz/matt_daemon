@@ -8,6 +8,8 @@
 
 /* CONSTRUCTORS ==============================================================*/
 Server::Server( void ) {
+	this->reporter = new Tintin_reporter("matt_daemon");
+	this->reporter->info("Server Initialized");
 }
 Server::Server( Server const & src ) {
 }

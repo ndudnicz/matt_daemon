@@ -14,10 +14,8 @@
 # define Tintin_reporter_HPP
 # include <fstream>
 # include <iostream>
-
-#include <string>
-
-using namespace std;
+# include <sys/stat.h>
+# include <sys/types.h>
 
 # include <string>
 
@@ -39,10 +37,10 @@ public:
 	void warning(std::string str);
 	void error(std::string str);
 	Tintin_reporter &setFilename(std::string	str);
-	ofstream		getFile( void ) const;
+	std::ofstream		getFile( void ) const;
 
 private:
-	ofstream		file;
+	std::ofstream		file;
 	void write(std::string errortype, std::string str);
 	Tintin_reporter &	operator=( Tintin_reporter const & rhs );
 
