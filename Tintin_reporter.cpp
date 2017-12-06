@@ -44,7 +44,7 @@ Tintin_reporter   &Tintin_reporter::setFilename(std::string fn){
   if (this->file)
   this->file.close();
 
-  std::string fullPath = "/tmp/log/" + fn + ".log";
+  std::string fullPath = "/var/log/" + fn + ".log";
   this->file = ofstream(fullPath, ios::out | ios::app);
   return *this;
 }

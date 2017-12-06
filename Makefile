@@ -12,7 +12,7 @@
 
 NAME = Matt_daemon
 
-CXX = clang++
+CXX = g++
 
 FLAGS = -Wall
 
@@ -24,7 +24,7 @@ OBJ = $(SRC:.cpp=.o)
 all: $(NAME)
 
 $(NAME): $(OBJ)
-	@$(CXX) $(FLAGS) -o $@ $(OBJ) -stdlib=libstdc++
+	@$(CXX) $(FLAGS) -o $@ $(OBJ)
 	@echo "COMPILATION de $(NAME)"
 
 %.o: %.cpp
