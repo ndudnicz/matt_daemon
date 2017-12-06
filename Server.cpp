@@ -5,13 +5,21 @@
 
 /* STATIC VARIABLES ==========================================================*/
 
+std::string Server::_SERVERNAME ="matt_daemon";
+std::string Server::_LOCKFILEDIR = "/var/lock/";
+std::string Server::_LOCKFILENAME = Server::_LOCKFILEDIR +Server::_SERVERNAME + ".lock";
 
 /* CONSTRUCTORS ==============================================================*/
 Server::Server( void ) {
-	struct stat buffer;   
-	  if (stat ("/var/lock/matt_daemon" , &buffer) == 0)
-		throw Server::AlreadyRunningException();
-	this->reporter = new Tintin_reporter("matt_daemon");
+/*	struct stat buffer;
+	if (stat (Server::_LOCKFILENAME.c_str() , &buffer) == 0) {
+	throw Server::AlreadyRunningException();
+}*/
+	this->_fdLock = open(Server::_LOCKFILENAME.c_str(), O_CREAT, 0666);
+	if (flock(this->_fdLock, LOCK_EX | LOCK_NB)) {
+			throw Server::AlreadyRunningException();
+		}
+	this->reporter = new Tintin_reporter(Server::_SERVERNAME);
 	this->reporter->info("Server Initialized");
 }
 Server::Server( Server const & src ) {
@@ -32,20 +40,21 @@ Server    &Server::operator=( Server const & rhs ) {
 
 /* DESTRUCTOR ================================================================*/
 Server::~Server( void ) {
+	flock(this->_fdLock, LOCK_UN);
 }
 
 Server::AlreadyRunningException::~AlreadyRunningException(){
 }
 
-const char *Server::AlreadyRunningException::what() const throw(){
-return ("The Daemon is already in use");
-}
 
 /* MEMBER FUNCTIONS ==========================================================*/
 void  Server::run(void) {
-  std::cout << "ruuuun" << std::endl;
+	std::cout << "ruuuun" << std::endl;
 }
 
+const char *Server::AlreadyRunningException::what() const throw(){
+	return ("Cannot acquire exclusive lock on /var/lock/matt_daemon.lock");
+}
 /* NON MEMBER FUNCTIONS ======================================================*/
 
 
