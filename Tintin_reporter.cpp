@@ -2,6 +2,7 @@
 
 /* STATIC VARIABLES ==========================================================*/
 
+#include "Tintin_reporter.hpp"
 
 /* CONSTRUCTORS ==============================================================*/
 Tintin_reporter::Tintin_reporter( void ) {
@@ -9,37 +10,44 @@ Tintin_reporter::Tintin_reporter( void ) {
 Tintin_reporter::Tintin_reporter( Tintin_reporter const & src ) {
 }
 
-/* MEMBER OPERATORS OVERLOAD =================================================*/
-Tintin_reporter    &Tintin_reporter::operator=( Tintin_reporter const & rhs ) {
+Tintin_reporter::Tintin_reporter( std::string fn) {
+  this->setFilename(fn);
 }
+/* MEMBER OPERATORS OVERLOAD =================================================*/
 
 
 /* DESTRUCTOR ================================================================*/
 Tintin_reporter::~Tintin_reporter( void ) {
+  this->file.close();
 }
 
 /* MEMBER FUNCTIONS ==========================================================*/
 void  Tintin_reporter::info(std::string str){
 
-  // write("INFO", str);
+  this->write("INFO", str);
 }
 
 void  Tintin_reporter::warning(std::string str){
 
-  // write("WARNING", str);
+  this->write("WARNING", str);
 }
 
 void  Tintin_reporter::error(std::string str){
-  // write("ERROR", str);
+
+  this->write("ERROR", str);
 }
 
 void  Tintin_reporter::write(std::string errortype, std::string str){
-
+  if (this->file)
+  this->file << errortype << " " << str;
 }
 
-Tintin_reporter   &Tintin_reporter::setFilename(std::string str){
+Tintin_reporter   &Tintin_reporter::setFilename(std::string fn){
+  if (this->file)
+  this->file.close();
 
-  // this->fileName  str;
+  std::string fullPath = "/var/log/" + fn + ".log";
+  this->file = ofstream(fullPath, ios::out | ios::app);
   return *this;
 }
 /* NON MEMBER FUNCTIONS ======================================================*/
