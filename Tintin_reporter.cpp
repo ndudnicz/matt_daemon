@@ -39,7 +39,7 @@ void  Tintin_reporter::error(std::string str){
 void  Tintin_reporter::write(std::string errortype, std::string str){
 	if (this->file)
 	{
-		this->file << this->getTime() << " [ " << errortype << " ] - " << str << '\n';
+		this->file << this->getTime() << " [ " << errortype << " ] - " << str << std::endl;
 		this->file.flush();
 	}
 }
