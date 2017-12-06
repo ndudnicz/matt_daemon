@@ -2,8 +2,6 @@
 
 /* STATIC VARIABLES ==========================================================*/
 
-#include "Tintin_reporter.hpp"
-
 /* CONSTRUCTORS ==============================================================*/
 Tintin_reporter::Tintin_reporter( void ) {
 }
@@ -47,7 +45,7 @@ Tintin_reporter   &Tintin_reporter::setFilename(std::string fn){
   this->file.close();
 
   std::string fullPath = "/var/log/" + fn + ".log";
-  this->file = ofstream(fullPath, ios::out | ios::app);
+  this->file = std::ofstream(fullPath, std::ios::out | std::ios::app);
   return *this;
 }
 /* NON MEMBER FUNCTIONS ======================================================*/

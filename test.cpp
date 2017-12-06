@@ -13,19 +13,17 @@
 #include <unistd.h>
 #include <stdlib.h>
 #include <iostream>
-#include <signal.h>
 
 #include "Server.hpp"
-
-void  ft(int sig) {
-  std::cout << "INTERRUPT!" << '\n';
-  exit(0);
-}
 
 int	main()
 {
   int  pid = 0;
 
+  if (getuid()) {
+    std::cout << "Permission denied. Run as root." << '\n';
+    exit(1);
+  }
   pid = fork();
   if (pid < 0)
     exit(EXIT_FAILURE);
