@@ -64,7 +64,7 @@ std::string	Tintin_reporter::getTime( void ) {
 	time (&rawtime);
 timeinfo = localtime(&rawtime);
 
-	strftime(buffer,sizeof(buffer),"[%d/%m/%Y-%I:%M:%S]",timeinfo);
+	strftime(buffer,sizeof(buffer),"[%d/%m/%Y-%H:%M:%S]",timeinfo);
 	return std::string(buffer);
 }
 /* NON MEMBER FUNCTIONS ======================================================*/
