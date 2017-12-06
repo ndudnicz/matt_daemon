@@ -6,7 +6,7 @@
 #    By: tmanet <tmanet@student.42.fr>              +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2017/01/09 10:10:37 by tmanet            #+#    #+#              #
-#    Updated: 2017/12/06 10:21:18 by tmanet           ###   ########.fr        #
+#    Updated: 2017/12/06 12:11:50 by tmanet           ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -14,7 +14,7 @@ NAME = Matt_daemon
 
 CXX = clang++
 
-FLAGS = -Wall -Wextra -Werror
+FLAGS = -Wall
 
 SRC = main.cpp \
 	  Tintin_reporter.cpp
@@ -24,7 +24,7 @@ OBJ = $(SRC:.cpp=.o)
 all: $(NAME)
 
 $(NAME): $(OBJ)
-	@$(CXX) $(FLAGS) -o $@ $(OBJ)
+	@$(CXX) $(FLAGS) -o $@ $(OBJ) -stdlib=libstdc++
 	@echo "COMPILATION de $(NAME)"
 
 %.o: %.cpp
