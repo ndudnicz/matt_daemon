@@ -10,8 +10,11 @@
 /*                                                                            */
 /* ************************************************************************** */
 
+#include "Tintin_reporter.hpp"
+
 int	main()
 {
+Tintin_reporter logger("toto");
 
 
 
