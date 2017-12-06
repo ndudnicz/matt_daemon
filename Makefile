@@ -16,7 +16,7 @@ CXX = g++
 
 FLAGS = -fsanitize=address#-Wall -Wextra #-Werror
 
-SRC =	main.cpp \
+SRC =	test.cpp \
 			Tintin_reporter.cpp \
 			Server.cpp
 
