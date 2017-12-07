@@ -8,6 +8,7 @@
 # include "Tintin_reporter.hpp"
 # include <sys/types.h>
 # include <sys/socket.h>
+# include <unistd.h>
 
 
 class Connection {
@@ -18,6 +19,7 @@ class Connection {
 		Connection &  operator=( Connection const & rhs );
 		void 					handleData(std::string data);
 		void 					handleLine( std::string line );
+		void 					sendMsg( std::string msg );
 
 		Tintin_reporter           *_reporter;
     	int                       _socket;
