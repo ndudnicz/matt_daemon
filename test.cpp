@@ -17,11 +17,6 @@
 
 #include "Server.hpp"
 
-void  ft(int sig) {
-  std::cout << "INTERRUPT!" << '\n';
-  exit(0);
-}
-
 int	main()
 {
   int  pid = 0;
@@ -39,7 +34,8 @@ int	main()
       exit(EXIT_FAILURE);
     }
   } else {
-    exit(0);
+    std::cout << "launcher exit" << '\n';
+    // exit(0);
   }
   std::cout << "return main" << '\n';
 	return 0;

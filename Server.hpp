@@ -11,6 +11,8 @@
 # define LISTEN_MAX             3
 # define DEFAULT_BINDING_IP     "127.0.0.1"
 
+/* http://man7.org/linux/man-pages/man7/signal.7.html */
+
 # define LOG_SIGHUP "SIGHUP"
 # define LOG_SIGINT "SIGINT"
 # define LOG_SIGQUIT "SIGQUIT"
@@ -48,12 +50,13 @@ class Server {
 	private:
 		Server( Server const & src );
 
-		Tintin_reporter           *reporter;
     int                       _fdLock;
-    static std::string        _LOCKFILENAME;
-    static std::string        _LOCKFILEDIR;
-    static std::string        _SERVERNAME;
+    static unsigned int       _nChild;
+    static std::string const  _SERVERNAME;
+    static std::string const  _LOCKFILEDIR;
+    static std::string const  _LOCKFILENAME;
     static std::string const  _LOGNAME;
+    Tintin_reporter           *reporter;
     int                       _socketMaster;
     int                       _inetAddr;
     int                       _port;
@@ -64,7 +67,7 @@ class Server {
 		Server( void );
 		~Server( void );
 
-    int  masterLoop(void);
+    int  masterLoop( void );
     void openConnection( void );
 
     static void  signalHandler( int sig );

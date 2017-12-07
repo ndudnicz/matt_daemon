@@ -10,11 +10,14 @@
 #include "Tintin_reporter.hpp"
 #include "error.hpp"
 
+#include <sys/wait.h>
+
 /* STATIC VARIABLES ==========================================================*/
 
-std::string Server::_SERVERNAME ="matt_daemon";
-std::string Server::_LOCKFILEDIR = "/var/lock/";
-std::string Server::_LOCKFILENAME = Server::_LOCKFILEDIR +Server::_SERVERNAME + ".lock";
+unsigned int       Server::_nChild = 0;
+std::string const  Server::_SERVERNAME ="matt_daemon";
+std::string const  Server::_LOCKFILEDIR = "/var/lock/";
+std::string const  Server::_LOCKFILENAME = Server::_LOCKFILEDIR +Server::_SERVERNAME + ".lock";
 std::string const  Server::_LOGNAME = "matt_daemon";
 
 /* CONSTRUCTORS ==============================================================*/
@@ -27,7 +30,7 @@ _port(0)
   this->_fdLock = open(Server::_LOCKFILENAME.c_str(), O_CREAT, 0666);
   if (flock(this->_fdLock, LOCK_EX | LOCK_NB)) {
       throw Server::AlreadyRunningException();
-    }
+  }
   this->reporter = new Tintin_reporter(Server::_SERVERNAME);
   this->reporter->info("Server Initialized");
   signal(SIGHUP, &Server::signalHandler);
@@ -130,11 +133,18 @@ Server::masterLoop(void) {
   cslen = sizeof(csin);
   while ((newSocket = accept(this->_socketMaster, (struct sockaddr*)&csin, &cslen)))
   {
-    pid = fork();
-    if (newSocket > 0 && pid == 0) {
-      /* CHILD */
-    } else if (newSocket > 0 && pid) {
-      /* PARENT */
+    if (Server::_nChild < 3) {
+      pid = fork();
+      if (newSocket > 0 && pid == 0) {
+        /* CHILD */
+        while (1);
+      } else if (newSocket > 0 && pid) {
+        /* PARENT */
+        Server::_nChild += 1;
+        std::cout << "add child, nChild = " << Server::_nChild << '\n';
+      }
+    } else {
+      std::cout << "nope, too many child :D" << '\n';
     }
   }
   close(this->_socketMaster);
@@ -143,14 +153,13 @@ Server::masterLoop(void) {
 
 void
 Server::signalHandler( int sig ) {
-  int const  ppid = getppid();
-
+  std::cout << getpid() << " ";
   switch (sig) {
     case SIGHUP:
     std::cout << LOG_SIGHUP << '\n';
     exit(0);
     case SIGINT:
-    std::cout << LOG_SIGINT << " pid:" << getpid() << '\n';
+    std::cout << LOG_SIGINT << '\n';
     exit(0);
     case SIGQUIT:
     std::cout << LOG_SIGQUIT << '\n';
@@ -181,6 +190,11 @@ Server::signalHandler( int sig ) {
     exit(0);
     case SIGUSR2:
     std::cout << LOG_SIGUSR2 << '\n';
+    exit(0);
+    case SIGCHLD:
+    std::cout << LOG_SIGCHLD << '\n';
+    Server::_nChild -= Server::_nChild > 0 ? 1 : 0;
+    std::cout << "del child, nChild = " << Server::_nChild << '\n';
     exit(0);
     case SIGKILL:
     std::cout << "KILLLL" << '\n';
