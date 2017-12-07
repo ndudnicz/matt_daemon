@@ -150,9 +150,9 @@ Server::masterLoop(void) {
 			pid = fork();
 			if (newSocket > 0 && pid == 0) {
 				/* CHILD */
-				// close(newSocket);
-				// exit(0);
-				while (1);
+				close(newSocket);
+				exit(0);
+				// while (1);
 			} else if (newSocket > 0 && pid) {
 				/* PARENT */
 				Server::_nChild += 1;
@@ -165,6 +165,16 @@ Server::masterLoop(void) {
 	}
 	close(this->_socketMaster);
 	return (0);
+}
+
+void
+Server::_erasePid( int pid ) {
+	for (std::list<int>::iterator it = Server::_pidArray->begin(); it != Server::_pidArray->end(); ++it) {
+		if (*it == pid) {
+			Server::_pidArray->erase(it);
+			break ;
+		}
+	}
 }
 
 void
@@ -223,6 +233,7 @@ Server::signalHandler( int sig ) {
 		case SIGCHLD:
 		std::cout << LOG_SIGCHLD << std::endl;
 		pid = wait(&stat_loc);
+		Server::_erasePid( pid );
 		Server::_nChild -= Server::_nChild > 0 ? 1 : 0;
 		std::cout << "del child, nChild = " << Server::_nChild << std::endl;
 		break;
@@ -281,17 +292,6 @@ Server::signalHandler( int sig ) {
 	}
 }
 
-void
-Server::erase( int pid ) {
-	std::list<int>::iterator	it;
-
-	for (; it != Server::_pidArray->end(); it++) {
-		// std::cout << "it: " << *it << std::endl;
-		if (*it == pid) {
-			Server::_pidArray->erase(it);
-		}
-	}
-}
 
 const char*
 Server::SyscallException::what( void ) const throw() {

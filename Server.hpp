@@ -61,7 +61,7 @@ class Server {
 		int							_port;
 		static std::list<int>		*_pidArray;
 
-		static void					erasePid( int pid );
+		static void					_erasePid( int pid );
 
 	protected:
 
