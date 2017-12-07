@@ -48,11 +48,15 @@ class Server {
 	private:
 		Server( Server const & src );
 
-		Tintin_reporter     *reporter;
-    int                 _fdLock;
-    static std::string  _LOCKFILENAME;
-    static std::string  _LOCKFILEDIR;
-    static std::string  _SERVERNAME;
+		Tintin_reporter           *reporter;
+    int                       _fdLock;
+    static std::string        _LOCKFILENAME;
+    static std::string        _LOCKFILEDIR;
+    static std::string        _SERVERNAME;
+    static std::string const  _LOGNAME;
+    int                       _socketMaster;
+    int                       _inetAddr;
+    int                       _port;
 
 	protected:
 
@@ -60,12 +64,12 @@ class Server {
 		Server( void );
 		~Server( void );
 
-		void  run(void);
+    int  masterLoop(void);
+    void openConnection( void );
+
+    static void  signalHandler( int sig );
 
 		Server &  operator=( Server const & rhs );
-
-
-
 
   /* Exceptions ==============================================================*/
 

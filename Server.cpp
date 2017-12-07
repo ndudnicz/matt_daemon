@@ -83,14 +83,14 @@ void
 Server::openConnection( void ) {
   struct protoent      *proto;
   struct sockaddr_in   sin;
-  struct timeval       timeout;
+  // struct timeval       timeout;
   int                  enable;
 
   enable = 1;
-  timeout.tv_sec = 10;
-  timeout.tv_usec = 0;
+  // timeout.tv_sec = 10;
+  // timeout.tv_usec = 0;
   sin.sin_port = htons((unsigned short)DEFAULT_LISTENING_PORT);
-  ntohs(sin.sin_port);
+  // ntohs(sin.sin_port);
   if ((proto = getprotobyname("tcp")) == 0) {
     this->reporter->error(GPBN_FAIL);
     throw Server::SyscallException();
