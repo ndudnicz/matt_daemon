@@ -5,6 +5,10 @@
 
 # include "Tintin_reporter.hpp"
 
+# define DEFAULT_LISTENING_PORT 4242
+# define LISTEN_MAX             3
+# define DEFAULT_BINDING_IP     "127.0.0.1"
+
 # define LOG_SIGHUP "SIGHUP"
 # define LOG_SIGINT "SIGINT"
 # define LOG_SIGQUIT "SIGQUIT"
@@ -42,9 +46,11 @@ class Server {
 private:
   Server( Server const & src );
 
-  Tintin_reporter           *reporter;
   static std::string const  _LOGNAME;
-
+  Tintin_reporter           *reporter;
+  int                       _socketMaster;
+  int                       _inetAddr;
+  int                       _port;
 
 protected:
 
@@ -53,6 +59,7 @@ public:
   ~Server( void );
 
   static void  signalHandler( int sig );
+  void  openConnection( void );
   void  masterLoop( void );
 
   Server &  operator=( Server const & rhs );
