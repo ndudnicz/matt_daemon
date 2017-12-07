@@ -17,27 +17,30 @@
 
 #include "Server.hpp"
 
-void ft(int sig) {
-  std::cout << "Child died!" << '\n';
+void  ft(int sig) {
+  std::cout << "INTERRUPT!" << '\n';
+  exit(0);
 }
 
 int	main()
 {
   int  pid = 0;
 
-  if (getuid()) {
-    std::cout << "Permission denied. Run as root." << std::endl;
-    exit(1);
-  }
-  signal(SIGCHLD, &ft);
   pid = fork();
   if (pid < 0)
-    return (EXIT_FAILURE);
+    exit(EXIT_FAILURE);
   else if (pid == 0) {
     Server  *s = new Server();
-    s->masterLoop();
-    return (0);
+    try {
+      s->openConnection();
+      s->masterLoop();
+    } catch (...) {
+      std::cout << "failure" << '\n';
+      exit(EXIT_FAILURE);
+    }
   } else {
-    return (0);
+    exit(0);
   }
+  std::cout << "return main" << '\n';
+	return 0;
 }

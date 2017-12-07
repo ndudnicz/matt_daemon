@@ -60,9 +60,25 @@ public:
 
   static void  signalHandler( int sig );
   void  openConnection( void );
-  void  masterLoop( void );
+  int   masterLoop( void );
 
   Server &  operator=( Server const & rhs );
+
+  /* Exceptions ==============================================================*/
+
+  class SyscallException : public std::exception {
+
+  private:
+    SyscallException &  operator=( SyscallException const & rhs );
+
+  protected:
+
+  public:
+    SyscallException( void ) throw();
+    SyscallException( SyscallException const & src ) throw();
+    ~SyscallException( void ) throw();
+    virtual const char *what( void ) const throw();
+  };
 
 };
 

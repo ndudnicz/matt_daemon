@@ -2,17 +2,17 @@
 #include <signal.h>
 #include <unistd.h>
 #include <sys/types.h>
-#include <netdb.h>
 #include <sys/socket.h>
+#include <netdb.h>
 #include <arpa/inet.h>
 
 #include "Server.hpp"
 #include "Tintin_reporter.hpp"
+#include "error.hpp"
 
 /* STATIC VARIABLES ==========================================================*/
 
 std::string const  Server::_LOGNAME = "matt_daemon";
-
 
 /* CONSTRUCTORS ==============================================================*/
 Server::Server( void ) :
@@ -44,17 +44,22 @@ _port(0)
 Server::Server( Server const & src ) {
 }
 
+Server::SyscallException::SyscallException( void ) throw() {}
+Server::SyscallException::SyscallException( SyscallException const & src ) throw() {}
+
 /* MEMBER OPERATORS OVERLOAD =================================================*/
-Server    &Server::operator=( Server const & rhs ) {
-}
+Server    &Server::operator=( Server const & rhs ) {}
 
 
 /* DESTRUCTOR ================================================================*/
-Server::~Server( void ) {
-}
+Server::~Server( void ) {}
+Server::SyscallException::~SyscallException( void ) throw() {}
 
 /* MEMBER FUNCTIONS ==========================================================*/
-int
+/*
+** Open a connection on port 4242
+*/
+void
 Server::openConnection( void ) {
   struct protoent      *proto;
   struct sockaddr_in   sin;
@@ -65,43 +70,55 @@ Server::openConnection( void ) {
   timeout.tv_sec = 10;
   timeout.tv_usec = 0;
   sin.sin_port = htons((unsigned short)DEFAULT_LISTENING_PORT);
-  ntohs(sin.sin_port));
+  ntohs(sin.sin_port);
   if ((proto = getprotobyname("tcp")) == 0) {
-    return (ft_error("Serveur", "", GPBN_FAIL, 1));
+    this->reporter->error(GPBN_FAIL);
+    throw Server::SyscallException();
   }
   if ((this->_socketMaster = socket(PF_INET, SOCK_STREAM, proto->p_proto)) < 0) {
-    // return (ft_error("Serveur", "open_connection:", SOCKET_FAILED, 1));
+    this->reporter->error(SOCKET_FAILED);
+    throw Server::SyscallException();
   }
-  // if (setsockopt(this->socketMaster, SOL_SOCKET, SO_RCVTIMEO, &timeout, sizeof(timeout)) < 0) {
-  //   return (ft_error("ERROR", "my_setsockopt()", SETSOCKOPT, 1));
-  // }
-  // if (setsockopt(this->socketMaster, SOL_SOCKET, SO_SNDTIMEO, &timeout, sizeof(timeout)) < 0) {
-  //   return (ft_error("ERROR", "my_setsockopt()", SETSOCKOPT, 1));
-  // }
-  if (setsockopt(this->socketMaster, SOL_SOCKET, SO_REUSEADDR, &enable, sizeof(enable)) < 0) {
-    // return (ft_error("ERROR", "my_setsockopt()", SETSOCKOPT, 1));
+  if (setsockopt(this->_socketMaster, SOL_SOCKET, SO_REUSEADDR, &enable, sizeof(enable)) < 0) {
+    this->reporter->error(SETSOCKOPT_FAILED);
+    throw Server::SyscallException();
   }
   sin.sin_family = AF_INET;
   if ((sin.sin_addr.s_addr = inet_addr(DEFAULT_BINDING_IP)) == INADDR_NONE) {
-    // return (ft_error("Serveur", "open_connection:", INET_ADDR_FAILED, 1));
+    this->reporter->error(INET_ADDR_FAILED);
+    throw Server::SyscallException();
   }
-  if (bind(this->socketMaster, (const struct sockaddr*)&sin, sizeof(sin)) < 0) {
-    // return (ft_error("Serveur", "open_connection:", CONNECT_ERROR, 1));
+  if (bind(this->_socketMaster, (const struct sockaddr*)&sin, sizeof(sin)) < 0) {
+    this->reporter->error(BIND_FAILED);
+    throw Server::SyscallException();
   }
-  if (listen(this->socketMaster, LISTEN_MAX) < 0) {
-    // return (ft_error("Serveur", "open_connection:", BIND_ERROR, 1));
+  if (listen(this->_socketMaster, LISTEN_MAX) < 0) {
+    this->reporter->error(LISTEN_FAILED);
+    throw Server::SyscallException();
   }
-  this->inet_addr = sin.sin_addr.s_addr;
-  this->port = sin.sin_port;
-  return (0);
+  this->_inetAddr = sin.sin_addr.s_addr;
+  this->_port = sin.sin_port;
 }
 
-void
+int
 Server::masterLoop(void) {
-  /*
-  ** Open a connection on port 4242
-  */
+  int                 pid;
+  struct sockaddr_in  csin;
+  unsigned int        cslen;
+  int                 newSocket;
 
+  cslen = sizeof(csin);
+  while ((newSocket = accept(this->_socketMaster, (struct sockaddr*)&csin, &cslen)))
+  {
+    pid = fork();
+    if (newSocket > 0 && pid == 0) {
+      /* CHILD */
+    } else if (newSocket > 0 && pid) {
+      /* PARENT */
+    }
+  }
+  close(this->_socketMaster);
+  return (0);
 }
 
 void
@@ -154,6 +171,10 @@ Server::signalHandler( int sig ) {
   }
 }
 
+const char*
+Server::SyscallException::what( void ) const throw() {
+  return ("");
+}
 /* NON MEMBER FUNCTIONS ======================================================*/
 
 
