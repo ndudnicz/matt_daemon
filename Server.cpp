@@ -19,6 +19,7 @@ std::string const	Server::_SERVERNAME ="matt_daemon";
 std::string const	Server::_LOCKFILEDIR = "/var/lock/";
 std::string const	Server::_LOCKFILENAME = Server::_LOCKFILEDIR +Server::_SERVERNAME + ".lock";
 std::string const	Server::_LOGNAME = "matt_daemon";
+std::list<int>		*Server::_pidArray = new std::list<int>;
 
 /* CONSTRUCTORS ==============================================================*/
 Server::Server( void ) :
@@ -26,6 +27,7 @@ reporter( new Tintin_reporter(Server::_LOGNAME) ),
 _socketMaster(0),
 _inetAddr(0),
 _port(0)
+// _pidArray( new std::list<int> )
 {
 	this->_fdLock = open(Server::_LOCKFILENAME.c_str(), O_CREAT, 0666);
 	if (flock(this->_fdLock, LOCK_EX | LOCK_NB)) {
@@ -50,7 +52,18 @@ _port(0)
 	signal(SIGTSTP, &Server::signalHandler);
 	signal(SIGTTIN, &Server::signalHandler);
 	signal(SIGTTOU, &Server::signalHandler);
-	signal(SIGKILL, &Server::signalHandler);
+	signal(SIGBUS, &Server::signalHandler);
+	signal(SIGSTKFLT, &Server::signalHandler);
+	signal(SIGURG, &Server::signalHandler);
+	signal(SIGXCPU, &Server::signalHandler);
+	signal(SIGXFSZ, &Server::signalHandler);
+	signal(SIGVTALRM, &Server::signalHandler);
+	signal(SIGPROF, &Server::signalHandler);
+	signal(SIGWINCH, &Server::signalHandler);
+	signal(SIGIO, &Server::signalHandler);
+	signal(SIGPWR, &Server::signalHandler);
+	signal(SIGSYS, &Server::signalHandler);
+	signal(SIGTRAP, &Server::signalHandler);
 }
 
 Server::Server( Server const & src ) {}
@@ -132,17 +145,18 @@ Server::masterLoop(void) {
 	cslen = sizeof(csin);
 	while ((newSocket = accept(this->_socketMaster, (struct sockaddr*)&csin, &cslen)))
 	{
+		std::cout << "list:" << Server::_pidArray->size() << '\n';
 		if (Server::_nChild < 3) {
 			pid = fork();
 			if (newSocket > 0 && pid == 0) {
 				/* CHILD */
-				std::cout << "exit child" << std::endl;
-				close(newSocket);
-				exit(0);
-				// while (1);
+				// close(newSocket);
+				// exit(0);
+				while (1);
 			} else if (newSocket > 0 && pid) {
 				/* PARENT */
 				Server::_nChild += 1;
+				Server::_pidArray->push_front(pid);
 				std::cout << "add child, nChild = " << Server::_nChild << std::endl;
 			}
 		} else {
@@ -155,7 +169,8 @@ Server::masterLoop(void) {
 
 void
 Server::signalHandler( int sig ) {
-	int stat_loc;
+	int	stat_loc;
+	int	pid;
 	std::cout << getpid() << " ";
 	switch (sig) {
 		case SIGHUP:
@@ -207,7 +222,7 @@ Server::signalHandler( int sig ) {
 		exit(0);
 		case SIGCHLD:
 		std::cout << LOG_SIGCHLD << std::endl;
-		wait(&stat_loc);
+		pid = wait(&stat_loc);
 		Server::_nChild -= Server::_nChild > 0 ? 1 : 0;
 		std::cout << "del child, nChild = " << Server::_nChild << std::endl;
 		break;
@@ -263,6 +278,15 @@ Server::signalHandler( int sig ) {
 		std::cout << "UNKNOWN" << std::endl;
 		exit(0);
 		break;
+	}
+}
+
+void
+Server::erase( int pid ) {
+	std::list<int>::iterator	it;
+
+	for (; it != Server::_pidArray->end(); it++) {
+		
 	}
 }
 

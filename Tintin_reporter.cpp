@@ -21,27 +21,27 @@ Tintin_reporter::~Tintin_reporter( void ) {
 }
 
 /* MEMBER FUNCTIONS ==========================================================*/
-void  Tintin_reporter::log(std::string str){
+void	Tintin_reporter::log(std::string str){
 
 	this->write("LOG", str);
 }
 
-void  Tintin_reporter::info(std::string str){
+void	Tintin_reporter::info(std::string str){
 
 	this->write("INFO", str);
 }
 
-void  Tintin_reporter::warning(std::string str){
+void	Tintin_reporter::warning(std::string str){
 
 	this->write("WARNING", str);
 }
 
-void  Tintin_reporter::error(std::string str){
+void	Tintin_reporter::error(std::string str){
 
 	this->write("ERROR", str);
 }
 
-void  Tintin_reporter::write(std::string errortype, std::string str){
+void	Tintin_reporter::write(std::string errortype, std::string str){
 	if (this->file)
 	{
 		this->file << this->getTime() << " [ " << errortype << " ] - " << str << std::endl;
@@ -49,7 +49,7 @@ void  Tintin_reporter::write(std::string errortype, std::string str){
 	}
 }
 
-Tintin_reporter   &Tintin_reporter::setFilename(std::string fn){
+Tintin_reporter	 &Tintin_reporter::setFilename(std::string fn){
 	if (this->file)
 		this->file.close();
 

@@ -2,6 +2,7 @@
 # define SERVER_HPP
 
 # include <signal.h>
+# include <list>
 
 # include "Tintin_reporter.hpp"
 #include <sys/file.h>
@@ -58,6 +59,9 @@ class Server {
 		int							_socketMaster;
 		int							_inetAddr;
 		int							_port;
+		static std::list<int>		*_pidArray;
+
+		static void					erasePid( int pid );
 
 	protected:
 
