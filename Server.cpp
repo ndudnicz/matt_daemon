@@ -8,6 +8,7 @@
 
 #include "Server.hpp"
 #include "Tintin_reporter.hpp"
+#include "Connection.hpp"
 #include "error.hpp"
 
 /* STATIC VARIABLES ==========================================================*/
@@ -133,6 +134,8 @@ Server::masterLoop(void) {
     pid = fork();
     if (newSocket > 0 && pid == 0) {
       /* CHILD */
+	  Connection *connect = new Connection(newSocket, this->reporter);
+	  connect->handle();
     } else if (newSocket > 0 && pid) {
       /* PARENT */
     }

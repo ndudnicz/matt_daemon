@@ -6,7 +6,7 @@
 #    By: tmanet <tmanet@student.42.fr>              +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2017/01/09 10:10:37 by tmanet            #+#    #+#              #
-#    Updated: 2017/12/06 12:11:50 by tmanet           ###   ########.fr        #
+#    Updated: 2017/12/07 19:07:49 by tmanet           ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -18,6 +18,7 @@ FLAGS = -Wall
 
 SRC =	test.cpp \
 			Tintin_reporter.cpp \
+			Connection.cpp \
 			Server.cpp
 
 OBJ = $(SRC:.cpp=.o)
