@@ -21,6 +21,11 @@ Tintin_reporter::~Tintin_reporter( void ) {
 }
 
 /* MEMBER FUNCTIONS ==========================================================*/
+void  Tintin_reporter::log(std::string str){
+
+	this->write("LOG", str);
+}
+
 void  Tintin_reporter::info(std::string str){
 
 	this->write("INFO", str);
