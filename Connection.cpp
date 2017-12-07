@@ -59,11 +59,18 @@ void 		Connection::handleLine(std::string line) {
 		close(this->_socket);
 		exit(42);
 	}
-	if (!line.empty())
+	else if (line.compare(0, 4, "help") == 0)
+	this->help();
+	else if (!line.empty())
 	this->_reporter->log(line);
 }
 
 
 void 		Connection::sendMsg(std::string msg){
-	::send(this->_socket, msg.c_str(), msg.length(), 0);
+	::send(this->_socket, (msg + '\n').c_str(), msg.length() + 1, 0);
+}
+
+void 		Connection::help( void ){
+	this->sendMsg("quit: Stop the daemon.");
+	this->sendMsg("help: Display this message.");
 }
