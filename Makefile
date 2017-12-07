@@ -16,7 +16,7 @@ CXX = g++
 
 FLAGS = -Wall
 
-SRC =	main.cpp \
+SRC =	test.cpp \
 			Tintin_reporter.cpp \
 			Server.cpp
 

@@ -12,6 +12,7 @@
 
 #ifndef Tintin_reporter_HPP
 # define Tintin_reporter_HPP
+
 # include <fstream>
 # include <iostream>
 # include <sys/stat.h>
