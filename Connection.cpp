@@ -2,10 +2,17 @@
 #include <stdlib.h>
 # include "Connection.hpp"
 
+
+const std::string	Connection::_GREETINGS = "Welcome to matt_daemon, type help to learn commands.";
+const std::string	Connection::_QUIT = "Stopping daemon, Bye!";
+
+
+
 Connection::Connection( int socket, Tintin_reporter *reporter ) {
 	this->_socket = socket;
 	this->_reporter = reporter;
 	this->_reporter->info("Client connected.");
+	this->sendMsg(Connection::_GREETINGS);
 }
 
 void 		Connection::handle( void ) {
@@ -55,7 +62,7 @@ void 		Connection::handleData(std::string data) {
 void 		Connection::handleLine(std::string line) {
 	if (line.compare(0, 4, "quit") == 0) {
 		this->_reporter->info("Request quit.");
-		this->sendMsg("Ok, thanks bye");
+		this->sendMsg(Connection::_QUIT);
 		close(this->_socket);
 		exit(42);
 	}

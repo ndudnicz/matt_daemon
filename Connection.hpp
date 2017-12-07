@@ -29,6 +29,8 @@ class Connection {
 		~Connection( void );
 		Connection( int socket, Tintin_reporter *reporter );
 		void handle( void );
+		static std::string const _GREETINGS;
+		static std::string const _QUIT;
 
 };
 #endif
