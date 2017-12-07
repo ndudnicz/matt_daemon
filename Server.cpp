@@ -286,7 +286,10 @@ Server::erase( int pid ) {
 	std::list<int>::iterator	it;
 
 	for (; it != Server::_pidArray->end(); it++) {
-		
+		// std::cout << "it: " << *it << std::endl;
+		if (*it == pid) {
+			Server::_pidArray->erase(it);
+		}
 	}
 }
 
