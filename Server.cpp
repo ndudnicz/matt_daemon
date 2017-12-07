@@ -137,15 +137,17 @@ Server::masterLoop(void) {
       pid = fork();
       if (newSocket > 0 && pid == 0) {
         /* CHILD */
+        std::cout << "exit child" << std::endl;
+        close(newSocket);
         exit(0);
         // while (1);
       } else if (newSocket > 0 && pid) {
         /* PARENT */
         Server::_nChild += 1;
-        std::cout << "add child, nChild = " << Server::_nChild << '\n';
+        std::cout << "add child, nChild = " << Server::_nChild << std::endl;
       }
     } else {
-      std::cout << "nope, too many child :D" << '\n';
+      std::cout << "nope, too many child :D" << std::endl;
     }
   }
   close(this->_socketMaster);
@@ -154,66 +156,84 @@ Server::masterLoop(void) {
 
 void
 Server::signalHandler( int sig ) {
+  int stat_loc;
   std::cout << getpid() << " ";
   switch (sig) {
     case SIGHUP:
-    std::cout << LOG_SIGHUP << '\n';
+    std::cout << LOG_SIGHUP << std::endl;
     exit(0);
     break;
     case SIGINT:
-    std::cout << LOG_SIGINT << '\n';
+    std::cout << LOG_SIGINT << std::endl;
     exit(0);
     break;
     case SIGQUIT:
-    std::cout << LOG_SIGQUIT << '\n';
+    std::cout << LOG_SIGQUIT << std::endl;
     exit(0);
     break;
     case SIGILL:
-    std::cout << LOG_SIGILL << '\n';
+    std::cout << LOG_SIGILL << std::endl;
     exit(0);
     break;
     case SIGABRT:
-    std::cout << LOG_SIGABRT << '\n';
+    std::cout << LOG_SIGABRT << std::endl;
     exit(0);
     break;
     case SIGFPE:
-    std::cout << LOG_SIGFPE << '\n';
+    std::cout << LOG_SIGFPE << std::endl;
     exit(0);
     break;
     case SIGSEGV:
-    std::cout << LOG_SIGSEGV << '\n';
+    std::cout << LOG_SIGSEGV << std::endl;
     exit(0);
     break;
     case SIGPIPE:
-    std::cout << LOG_SIGPIPE << '\n';
+    std::cout << LOG_SIGPIPE << std::endl;
     exit(0);
     break;
     case SIGALRM:
-    std::cout << LOG_SIGALRM << '\n';
+    std::cout << LOG_SIGALRM << std::endl;
     exit(0);
     break;
     case SIGTERM:
-    std::cout << LOG_SIGTERM << '\n';
+    std::cout << LOG_SIGTERM << std::endl;
     exit(0);
     break;
     case SIGUSR1:
-    std::cout << LOG_SIGUSR1 << '\n';
+    std::cout << LOG_SIGUSR1 << std::endl;
     exit(0);
     break;
     case SIGUSR2:
-    std::cout << LOG_SIGUSR2 << '\n';
+    std::cout << LOG_SIGUSR2 << std::endl;
     exit(0);
     case SIGCHLD:
-    std::cout << LOG_SIGCHLD << '\n';
+    std::cout << LOG_SIGCHLD << std::endl;
+    wait(&stat_loc);
     Server::_nChild -= Server::_nChild > 0 ? 1 : 0;
-    std::cout << "del child, nChild = " << Server::_nChild << '\n';
+    std::cout << "del child, nChild = " << Server::_nChild << std::endl;
     break;
     case SIGKILL:
-    std::cout << "KILLLL" << '\n';
+    std::cout << "KILLLL" << std::endl;
+    exit(0);
+    break;
+    case SIGSTKFLT:
+    std::cout << LOG_SIGSTKFLT << std::endl;
+    exit(0);
+    break;
+    case SIGURG:
+    std::cout << LOG_SIGURG << std::endl;
+    exit(0);
+    break;
+    case SIGXCPU:
+    std::cout << LOG_SIGXCPU << std::endl;
+    exit(0);
+    break;
+    case SIGXFSZ:
+    std::cout << LOG_SIGXFSZ << std::endl;
     exit(0);
     break;
     default:
-    std::cout << "UNKNOWN" << '\n';
+    std::cout << "UNKNOWN" << std::endl;
     exit(0);
     break;
   }
