@@ -137,7 +137,8 @@ Server::masterLoop(void) {
       pid = fork();
       if (newSocket > 0 && pid == 0) {
         /* CHILD */
-        while (1);
+        exit(0);
+        // while (1);
       } else if (newSocket > 0 && pid) {
         /* PARENT */
         Server::_nChild += 1;
@@ -158,36 +159,47 @@ Server::signalHandler( int sig ) {
     case SIGHUP:
     std::cout << LOG_SIGHUP << '\n';
     exit(0);
+    break;
     case SIGINT:
     std::cout << LOG_SIGINT << '\n';
     exit(0);
+    break;
     case SIGQUIT:
     std::cout << LOG_SIGQUIT << '\n';
     exit(0);
+    break;
     case SIGILL:
     std::cout << LOG_SIGILL << '\n';
     exit(0);
+    break;
     case SIGABRT:
     std::cout << LOG_SIGABRT << '\n';
     exit(0);
+    break;
     case SIGFPE:
     std::cout << LOG_SIGFPE << '\n';
     exit(0);
+    break;
     case SIGSEGV:
     std::cout << LOG_SIGSEGV << '\n';
     exit(0);
+    break;
     case SIGPIPE:
     std::cout << LOG_SIGPIPE << '\n';
     exit(0);
+    break;
     case SIGALRM:
     std::cout << LOG_SIGALRM << '\n';
     exit(0);
+    break;
     case SIGTERM:
     std::cout << LOG_SIGTERM << '\n';
     exit(0);
+    break;
     case SIGUSR1:
     std::cout << LOG_SIGUSR1 << '\n';
     exit(0);
+    break;
     case SIGUSR2:
     std::cout << LOG_SIGUSR2 << '\n';
     exit(0);
@@ -195,13 +207,15 @@ Server::signalHandler( int sig ) {
     std::cout << LOG_SIGCHLD << '\n';
     Server::_nChild -= Server::_nChild > 0 ? 1 : 0;
     std::cout << "del child, nChild = " << Server::_nChild << '\n';
-    exit(0);
+    break;
     case SIGKILL:
     std::cout << "KILLLL" << '\n';
     exit(0);
+    break;
     default:
     std::cout << "UNKNOWN" << '\n';
     exit(0);
+    break;
   }
 }
 
