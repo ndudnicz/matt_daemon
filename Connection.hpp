@@ -5,6 +5,7 @@
 
 # include <string>
 # include <strings.h>
+# include <stdbool.h>
 # include <sstream>
 # include "Tintin_reporter.hpp"
 # include <sys/types.h>
@@ -19,16 +20,17 @@ class Connection {
 		Connection( Connection const & src );
 		Connection( void );
 		Connection & operator=( Connection const & rhs );
-		void 						handleData(std::string data);
-		void 						handleLine( std::string line );
-		void	 					sendMsg( std::string msg );
-		void	 					help( void );
-		void 						quit( void );
-		void 						user( std::string user );
-		void						prompt( void );
-		void						log( std::string msg);
-		std::string					*_userName;
-		static std::string const	_GREETINGS;
+		void 					handleData(std::string data);
+		void 					handleLine( std::string line );
+		void 					sendMsg( std::string msg );
+		void 					help( void );
+		void 					quit( void );
+		void 					user( std::string user );
+		void					prompt( void );
+		void					log( std::string msg);
+		std::string				*_userName;
+		bool					_enablePrompt;
+		bool					_enableMirror;
 
 		Tintin_reporter           *_reporter;
 		int                       _socket;
