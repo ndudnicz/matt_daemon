@@ -231,7 +231,7 @@ Server::signalHandler( int sig ) {
 			exit(0);
 		} else {
 			Server::_erasePid( pid );
-			Server::_reporter->info( "Signal handler." );
+			// Server::_reporter->info( "Signal handler." );
 			Server::_nChild -= Server::_nChild > 0 ? 1 : 0;
 		}
 		break;

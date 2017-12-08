@@ -20,8 +20,8 @@ class Connection {
 		Connection( Connection const & src );
 		Connection( void );
 		Connection & operator=( Connection const & rhs );
-		void 					handleData(std::string data);
-		void 					handleLine( std::string line );
+		void 					_handleData(std::string data);
+		void 					_handleLine( std::string line );
 		void 					sendMsg( std::string msg );
 		void 					help( void );
 		void 					quit( void );
@@ -31,6 +31,8 @@ class Connection {
 		std::string				*_userName;
 		bool					_enablePrompt;
 		bool					_enableMirror;
+		static const std::string	_GREETINGS;
+		static std::string const	_QUIT;
 
 		Tintin_reporter           *_reporter;
 		int                       _socket;

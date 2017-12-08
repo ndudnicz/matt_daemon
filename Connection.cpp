@@ -4,6 +4,7 @@
 
 const std::string	Connection::_GREETINGS = "Welcome to matt_daemon, type help to learn commands.";
 int const			Connection::EXIT_QUIT = 42;
+std::string const	Connection::_QUIT = "Stopping daemon, Bye!";
 
 Connection::Connection( int socket, Tintin_reporter *reporter ) :
 _reporter(reporter),
