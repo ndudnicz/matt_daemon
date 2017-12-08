@@ -86,7 +86,7 @@ Connection::quit( void ){
 	this->_reporter->info(stream.str());
 	this->sendMsg(Connection::_QUIT);
 	close(this->_socket);
-	stream.clear();
+	stream.str(std::string());
 	stream << *this->_userName << " disconnected.";
 	this->_reporter->info(stream.str());
 	exit(Connection::EXIT_QUIT);
@@ -94,6 +94,10 @@ Connection::quit( void ){
 
 void
 Connection::user( std::string user){
+	std::string::size_type nameStart = user.find_first_not_of(" \t\n");
+	if (nameStart != std::string::npos){
+	std::string::size_type nameEnd = user.find_last_not_of(" \t\n");
+	user = user.substr(nameStart, nameEnd - nameStart + 1);
 	if (!user.empty()){
 		std::stringstream stream;
 		stream << *this->_userName << " change username to " << user;
@@ -101,6 +105,7 @@ Connection::user( std::string user){
 		delete(this->_userName);
 		this->_userName = new std::string(user);
 	}
+}
 }
 
 void
