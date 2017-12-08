@@ -57,6 +57,7 @@ class Server {
 		int							_port;
 		static std::list<int>		*_pidList;
 		static std::string const	_SERVERNAME;
+		static unsigned int			_nClients;
 
 		static void					_erasePid( int pid );
 		static void					_killAllChilds( void );

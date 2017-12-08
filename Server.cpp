@@ -6,6 +6,7 @@
 #include <netdb.h>
 #include <arpa/inet.h>
 #include <sys/wait.h>
+#include <sstream>
 
 #include "Server.hpp"
 #include "Tintin_reporter.hpp"
@@ -21,6 +22,7 @@ std::string const	Server::_LOCKFILEDIR = "/var/lock/";
 std::string const	Server::_LOCKFILENAME = Server::_LOCKFILEDIR +Server::_SERVERNAME + ".lock";
 std::list<int>		*Server::_pidList = new std::list<int>;
 Tintin_reporter		*Server::_reporter = NULL;
+unsigned int		Server::_nClients = 3;
 
 /* CONSTRUCTORS ==============================================================*/
 
@@ -146,7 +148,7 @@ Server::masterLoop(void) {
 	cslen = sizeof(csin);
 	while ((newSocket = accept(this->_socketMaster, (struct sockaddr*)&csin, &cslen)))
 	{
-		if (Server::_nChild < 3) {
+		if (Server::_nChild < Server::_nClients) {
 			pid = fork();
 			if (newSocket > 0 && pid == 0) {
 				Connection *connect = new Connection(newSocket, Server::_reporter);
@@ -156,8 +158,10 @@ Server::masterLoop(void) {
 				Server::_pidList->push_front(pid);
 			}
 		} else {
+			std::stringstream	s;
+			s << "Max number of clients already logged in (" << Server::_nClients << ")";
+			Server::_reporter->warning(s.str());
 			close(newSocket);
-			std::cout << "nope, too many child :D" << std::endl;
 		}
 	}
 	close(this->_socketMaster);
@@ -183,8 +187,8 @@ Server::_killAllChilds( void ) {
 
 void
 Server::signalHandler( int sig ) {
-	int	stat_loc;
-	int	pid;
+	int	stat_loc = 0;
+	int	pid = 0;
 	if (sig != SIGCHLD) {
 		Server::_reporter->info( "Signal handler." );
 	}
@@ -224,15 +228,20 @@ Server::signalHandler( int sig ) {
 		case SIGUSR2:
 		break;
 		case SIGCHLD:
-		pid = wait(&stat_loc);
-		if (WIFEXITED(stat_loc) && WEXITSTATUS(stat_loc) == Connection::EXIT_QUIT) {
-			Server::_killAllChilds();
-			Server::_reporter->info("Quitting.");
-			exit(0);
-		} else {
-			Server::_erasePid( pid );
-			// Server::_reporter->info( "Signal handler." );
+		while (1) {
+			pid = waitpid(-1, &stat_loc, WNOHANG);
+			if (pid < 0) {
+				break ;
+			}
 			Server::_nChild -= Server::_nChild > 0 ? 1 : 0;
+			if (WIFEXITED(stat_loc) && WEXITSTATUS(stat_loc) == Connection::EXIT_QUIT) {
+				Server::_killAllChilds();
+				Server::_reporter->info("Quitting.");
+				exit(0);
+			} else {
+				Server::_erasePid( pid );
+				// Server::_reporter->info( "Signal handler." );
+			}
 		}
 		break;
 		case SIGKILL:
@@ -260,6 +269,7 @@ Server::signalHandler( int sig ) {
 		exit(0);
 		break;
 		case SIGIO:
+		std::cout << "SIGIO " << getpid() << '\n';
 		exit(0);
 		break;
 		case SIGPWR:
