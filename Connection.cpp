@@ -1,26 +1,26 @@
-
 #include <stdlib.h>
-# include "Connection.hpp"
+
+#include "Connection.hpp"
 
 
 const std::string	Connection::_GREETINGS = "Welcome to matt_daemon, type help to learn commands.";
 const std::string	Connection::_QUIT = "Stopping daemon, Bye!";
+int const			Connection::EXIT_QUIT = 42;
 
-
-
-Connection::Connection( int socket, Tintin_reporter *reporter ) {
-	this->_socket = socket;
-	this->_reporter = reporter;
+Connection::Connection( int socket, Tintin_reporter *reporter ) :
+_reporter(reporter),
+_socket(socket)
+{
 	this->_reporter->info("Client connected.");
 	this->sendMsg(Connection::_GREETINGS);
 }
 
-void 		Connection::handle( void ) {
+void
+Connection::handle( void ) {
 
-	char	buffer[BUFF_SIZE];
-
-	std::string recv;
-	int 	receivedSize = 0;
+	char		buffer[BUFF_SIZE];
+	std::string	recv;
+	int 		receivedSize = 0;
 
 	::bzero(buffer, BUFF_SIZE);
 	while (
@@ -47,7 +47,8 @@ void 		Connection::handle( void ) {
 }
 
 
-void 		Connection::handleData(std::string data) {
+void
+Connection::handleData( std::string data ) {
 
 	size_t startPos = 0;
 	size_t endPos = 0;
@@ -59,12 +60,13 @@ void 		Connection::handleData(std::string data) {
 
 }
 
-void 		Connection::handleLine(std::string line) {
+void
+Connection::handleLine( std::string line ) {
 	if (line.compare(0, 4, "quit") == 0) {
 		this->_reporter->info("Request quit.");
 		this->sendMsg(Connection::_QUIT);
 		close(this->_socket);
-		exit(42);
+		exit(Connection::EXIT_QUIT);
 	}
 	else if (line.compare(0, 4, "help") == 0)
 	this->help();
@@ -73,11 +75,13 @@ void 		Connection::handleLine(std::string line) {
 }
 
 
-void 		Connection::sendMsg(std::string msg){
+void
+Connection::sendMsg( std::string msg ){
 	::send(this->_socket, (msg + '\n').c_str(), msg.length() + 1, 0);
 }
 
-void 		Connection::help( void ){
+void
+Connection::help( void ){
 	this->sendMsg("quit: Stop the daemon.");
 	this->sendMsg("help: Display this message.");
 }

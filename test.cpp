@@ -5,28 +5,22 @@
 
 #include "Server.hpp"
 
-int	main()
+int	main( void )
 {
-	int	pid = 0;
-
-	pid = fork();
-	if (pid < 0)
-		exit(EXIT_FAILURE);
-	else if (pid == 0) {
+	if (getuid()) {
+		std::cout << "Permission denied. Run as root." << std::endl;
+		return (1);
+	} else {
+		Server	*s = new Server();
 		try {
-			Server	*s = new Server();
 			s->openConnection();
 			s->masterLoop();
-		} catch (Server::AlreadyRunningException & e) {
-			std::cout <<std::endl<< e.what() << std::endl;
-			exit(EXIT_FAILURE);
+		// } catch (Server::AlreadyRunningException & e) {
+			// std::cout <<std::endl<< e.what() << std::endl;
+			// exit(EXIT_FAILURE);
 		} catch (Server::SyscallException & e) {
 			exit(EXIT_FAILURE);
 		}
-	} else {
-		// std::cout << "launcher exit" << '\n';
-		// exit(0);
+		return 0;
 	}
-	// std::cout << "return main" << '\n';
-	return 0;
 }
