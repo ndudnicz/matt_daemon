@@ -156,6 +156,7 @@ Server::masterLoop(void) {
 				Server::_pidList->push_front(pid);
 			}
 		} else {
+			close(newSocket);
 			std::cout << "nope, too many child :D" << std::endl;
 		}
 	}
