@@ -21,6 +21,7 @@ class Connection {
 		void 					handleLine( std::string line );
 		void 					sendMsg( std::string msg );
 		void 					help( void );
+		void					prompt( void );
 
 		Tintin_reporter           *_reporter;
     	int                       _socket;

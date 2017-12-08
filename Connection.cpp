@@ -13,6 +13,7 @@ Connection::Connection( int socket, Tintin_reporter *reporter ) {
 	this->_reporter = reporter;
 	this->_reporter->info("Client connected.");
 	this->sendMsg(Connection::_GREETINGS);
+	this->prompt();
 }
 
 void 		Connection::handle( void ) {
@@ -41,6 +42,7 @@ void 		Connection::handle( void ) {
 			recv.clear();
 		}
 		::bzero(buffer, BUFF_SIZE);
+		this->prompt();
 	}
 	this->_reporter->info("Client disconnected.");
 	exit(0);
@@ -75,6 +77,10 @@ void 		Connection::handleLine(std::string line) {
 
 void 		Connection::sendMsg(std::string msg){
 	::send(this->_socket, (msg + '\n').c_str(), msg.length() + 1, 0);
+}
+
+void		Connection::prompt( void ) {
+	::send(this->_socket, "> ", 2, 0);
 }
 
 void 		Connection::help( void ){
