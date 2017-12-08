@@ -119,10 +119,11 @@ Server::openConnection( void ) {
 		throw Server::SyscallException();
 	}
 	sin.sin_family = AF_INET;
-	if ((sin.sin_addr.s_addr = inet_addr(DEFAULT_BINDING_IP)) == INADDR_NONE) {
-		this->reporter->error(INET_ADDR_FAILED);
-		throw Server::SyscallException();
-	}
+	sin.sin_addr.s_addr = htonl(INADDR_ANY);
+	// if ((sin.sin_addr.s_addr = htonl(INADDR_ANY))== INADDR_NONE) {
+	// 	this->reporter->error(INET_ADDR_FAILED);
+	// 	throw Server::SyscallException();
+	// }
 	if (bind(this->_socketMaster, (const struct sockaddr*)&sin, sizeof(sin)) < 0) {
 		this->reporter->error(BIND_FAILED);
 		throw Server::SyscallException();
@@ -150,9 +151,9 @@ Server::masterLoop(void) {
 			pid = fork();
 			if (newSocket > 0 && pid == 0) {
 				/* CHILD */
-				close(newSocket);
-				exit(0);
-				// while (1);
+				// close(newSocket);
+				// exit(0);
+				while (1);
 			} else if (newSocket > 0 && pid) {
 				/* PARENT */
 				Server::_nChild += 1;
@@ -174,6 +175,13 @@ Server::_erasePid( int pid ) {
 			Server::_pidArray->erase(it);
 			break ;
 		}
+	}
+}
+
+void
+Server::_killAllChilds( void ) {
+	for (std::list<int>::iterator it = Server::_pidArray->begin(); it != Server::_pidArray->end(); ++it) {
+		kill(*it, SIGINT);
 	}
 }
 
@@ -233,9 +241,14 @@ Server::signalHandler( int sig ) {
 		case SIGCHLD:
 		std::cout << LOG_SIGCHLD << std::endl;
 		pid = wait(&stat_loc);
-		Server::_erasePid( pid );
-		Server::_nChild -= Server::_nChild > 0 ? 1 : 0;
-		std::cout << "del child, nChild = " << Server::_nChild << std::endl;
+		if (WIFEXITED(stat_loc) && WEXITSTATUS(stat_loc) == EXIT_QUIT) {
+			Server::_killAllChilds();
+			exit(0);
+		} else {
+			Server::_erasePid( pid );
+			Server::_nChild -= Server::_nChild > 0 ? 1 : 0;
+		}
+		// std::cout << "del child, nChild = " << Server::_nChild << std::endl;
 		break;
 		case SIGKILL:
 		std::cout << "KILLLL" << std::endl;

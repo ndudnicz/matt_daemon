@@ -10,7 +10,7 @@
 
 # define DEFAULT_LISTENING_PORT	4242
 # define LISTEN_MAX				3
-# define DEFAULT_BINDING_IP		"127.0.0.1"
+# define DEFAULT_BINDING_IP		"10.0.2.15"
 
 /* http://man7.org/linux/man-pages/man7/signal.7.html */
 
@@ -44,6 +44,8 @@
 # define LOG_SIGSYS "SIGSYS"
 # define LOG_SIGTRAP "SIGTRAP"
 
+# define EXIT_QUIT 42
+
 class Server {
 
 	private:
@@ -62,6 +64,7 @@ class Server {
 		static std::list<int>		*_pidArray;
 
 		static void					_erasePid( int pid );
+		static void					_killAllChilds( void );
 
 	protected:
 
