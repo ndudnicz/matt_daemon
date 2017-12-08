@@ -5,6 +5,7 @@
 
 # include <string>
 # include <strings.h>
+# include <sstream>
 # include "Tintin_reporter.hpp"
 # include <sys/types.h>
 # include <sys/socket.h>
@@ -21,7 +22,11 @@ class Connection {
 		void 					handleLine( std::string line );
 		void 					sendMsg( std::string msg );
 		void 					help( void );
+		void 					quit( void );
+		void 					user( std::string user );
 		void					prompt( void );
+		void					log( std::string msg);
+		std::string				*_userName;
 
 		Tintin_reporter           *_reporter;
     	int                       _socket;

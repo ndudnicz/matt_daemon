@@ -11,7 +11,11 @@ const std::string	Connection::_QUIT = "Stopping daemon, Bye!";
 Connection::Connection( int socket, Tintin_reporter *reporter ) {
 	this->_socket = socket;
 	this->_reporter = reporter;
-	this->_reporter->info("Client connected.");
+	std::stringstream stream;
+	stream << "client_"<< ::getpid();
+	this->_userName = new std::string(stream.str());
+	stream << " connected.";
+	this->_reporter->info(stream.str());
 	this->sendMsg(Connection::_GREETINGS);
 	this->prompt();
 }
@@ -44,7 +48,9 @@ void 		Connection::handle( void ) {
 		::bzero(buffer, BUFF_SIZE);
 		this->prompt();
 	}
-	this->_reporter->info("Client disconnected.");
+	std::stringstream stream;
+	stream << *this->_userName << " disconnected.";
+	this->_reporter->info(stream.str());
 	exit(0);
 }
 
@@ -62,28 +68,56 @@ void 		Connection::handleData(std::string data) {
 }
 
 void 		Connection::handleLine(std::string line) {
-	if (line.compare(0, 4, "quit") == 0) {
-		this->_reporter->info("Request quit.");
-		this->sendMsg(Connection::_QUIT);
-		close(this->_socket);
-		exit(42);
-	}
+	if (line.compare(0, 4, "quit") == 0)
+	this->quit();
+	else if (line.compare(0, 5, "user ") == 0)
+	this->user(line.substr(5));
 	else if (line.compare(0, 4, "help") == 0)
 	this->help();
 	else if (!line.empty())
-	this->_reporter->log(line);
+	this->log(line);
 }
 
+void		Connection::quit( void ){
+
+	std::stringstream stream;
+	stream << *this->_userName << " request server to quit.";
+	this->_reporter->info(stream.str());
+	this->sendMsg(Connection::_QUIT);
+	close(this->_socket);
+	stream.clear();
+	stream << *this->_userName << " disconnected.";
+	this->_reporter->info(stream.str());
+	exit(42);
+}
+
+void		Connection::user( std::string user){
+	if (!user.empty()){
+		std::stringstream stream;
+		stream << *this->_userName << " change username to " << user;
+		this->_reporter->info(stream.str());
+		delete(this->_userName);
+		this->_userName = new std::string(user);
+	}
+}
 
 void 		Connection::sendMsg(std::string msg){
 	::send(this->_socket, (msg + '\n').c_str(), msg.length() + 1, 0);
 }
 
 void		Connection::prompt( void ) {
-	::send(this->_socket, "> ", 2, 0);
+	std::string prompt = *this->_userName;
+	prompt.append("> ");
+	::send(this->_socket, prompt.c_str(), prompt.length(), 0);
 }
 
 void 		Connection::help( void ){
 	this->sendMsg("quit: Stop the daemon.");
 	this->sendMsg("help: Display this message.");
+}
+
+void		Connection::log(std::string	msg) {
+	std::stringstream stream;
+	stream << *this->_userName << ": " << msg;
+	this->_reporter->log(stream.str());
 }
