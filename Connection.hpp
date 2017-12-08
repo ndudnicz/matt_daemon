@@ -19,15 +19,16 @@ class Connection {
 		Connection( Connection const & src );
 		Connection( void );
 		Connection & operator=( Connection const & rhs );
-		void 					handleData(std::string data);
-		void 					handleLine( std::string line );
-		void 					sendMsg( std::string msg );
-		void 					help( void );
-		void 					quit( void );
-		void 					user( std::string user );
-		void					prompt( void );
-		void					log( std::string msg);
-		std::string				*_userName;
+		void 						handleData(std::string data);
+		void 						handleLine( std::string line );
+		void	 					sendMsg( std::string msg );
+		void	 					help( void );
+		void 						quit( void );
+		void 						user( std::string user );
+		void						prompt( void );
+		void						log( std::string msg);
+		std::string					*_userName;
+		static std::string const	_GREETINGS;
 
 		Tintin_reporter           *_reporter;
 		int                       _socket;
@@ -35,9 +36,7 @@ class Connection {
 	public:
 		~Connection( void );
 		Connection( int socket, Tintin_reporter *reporter );
-		void handle( void );
-		static std::string const	_GREETINGS;
-		static std::string const	_QUIT;
+		void						handle( void );
 		static int const			EXIT_QUIT;
 
 };

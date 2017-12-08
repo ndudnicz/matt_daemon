@@ -2,12 +2,8 @@
 
 #include "Connection.hpp"
 
-
 const std::string	Connection::_GREETINGS = "Welcome to matt_daemon, type help to learn commands.";
-const std::string	Connection::_QUIT = "Stopping daemon, Bye!";
 int const			Connection::EXIT_QUIT = 42;
-
-
 
 Connection::Connection( int socket, Tintin_reporter *reporter ) :
 _reporter(reporter),
@@ -42,7 +38,7 @@ Connection::handle( void ) {
 	{
 		recv.append(buffer, receivedSize);
 		if (receivedSize < BUFF_SIZE) {
-			this->handleData(recv);
+			this->_handleData(recv);
 			recv.clear();
 		}
 		::bzero(buffer, BUFF_SIZE);
@@ -55,20 +51,19 @@ Connection::handle( void ) {
 }
 
 void
-Connection::handleData( std::string data ) {
+Connection::_handleData( std::string data ) {
 
 	size_t startPos = 0;
 	size_t endPos = 0;
 	while (((endPos = data.find('\n', startPos)) != std::string::npos))
 	{
-		this->handleLine(data.substr(startPos, endPos - startPos));
+		this->_handleLine(data.substr(startPos, endPos - startPos));
 		startPos = endPos + 1;
 	}
 }
 
-
 void
-Connection::handleLine(std::string line) {
+Connection::_handleLine(std::string line) {
 	if (line.compare(0, 4, "quit") == 0)
 	this->quit();
 	else if (line.compare(0, 5, "user ") == 0)
@@ -121,7 +116,8 @@ Connection::help( void ){
 	this->sendMsg("help: Display this message.");
 }
 
-void		Connection::log(std::string	msg) {
+void
+Connection::log( std::string msg ) {
 	std::stringstream stream;
 	stream << *this->_userName << ": " << msg;
 	this->_reporter->log(stream.str());

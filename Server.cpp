@@ -190,43 +190,33 @@ Server::signalHandler( int sig ) {
 	}
 	switch (sig) {
 		case SIGHUP:
-		// std::cout << LOG_SIGHUP << std::endl;
 		exit(0);
 		break;
 		case SIGINT:
-		// std::cout << LOG_SIGINT << std::endl;
 		exit(0);
 		break;
 		case SIGQUIT:
-		// std::cout << LOG_SIGQUIT << std::endl;
 		exit(0);
 		break;
 		case SIGILL:
-		// std::cout << LOG_SIGILL << std::endl;
 		exit(0);
 		break;
 		case SIGABRT:
-		// std::cout << LOG_SIGABRT << std::endl;
 		exit(0);
 		break;
 		case SIGFPE:
-		// std::cout << LOG_SIGFPE << std::endl;
 		exit(0);
 		break;
 		case SIGSEGV:
-		// std::cout << LOG_SIGSEGV << std::endl;
 		exit(0);
 		break;
 		case SIGPIPE:
-		// std::cout << LOG_SIGPIPE << std::endl;
 		exit(0);
 		break;
 		case SIGALRM:
-		// std::cout << LOG_SIGALRM << std::endl;
 		exit(0);
 		break;
 		case SIGTERM:
-		// std::cout << LOG_SIGTERM << std::endl;
 		exit(0);
 		break;
 		case SIGUSR1:

@@ -15,9 +15,6 @@ int	main( void )
 		try {
 			s->openConnection();
 			s->masterLoop();
-		// } catch (Server::AlreadyRunningException & e) {
-			// std::cout <<std::endl<< e.what() << std::endl;
-			// exit(EXIT_FAILURE);
 		} catch (Server::SyscallException & e) {
 			exit(EXIT_FAILURE);
 		}
