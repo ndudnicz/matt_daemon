@@ -1,15 +1,3 @@
-/* ************************************************************************** */
-/*                                                                            */
-/*                                                        :::      ::::::::   */
-/*   Tintin_reporter.hpp                                :+:      :+:    :+:   */
-/*                                                    +:+ +:+         +:+     */
-/*   By: tmanet <tmanet@student.42.fr>              +#+  +:+       +#+        */
-/*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2017/12/06 09:23:52 by tmanet            #+#    #+#             */
-/*   Updated: 2017/12/07 12:52:27 by tmanet           ###   ########.fr       */
-/*                                                                            */
-/* ************************************************************************** */
-
 #ifndef Tintin_reporter_HPP
 # define Tintin_reporter_HPP
 
@@ -32,8 +20,6 @@ public:
 	Tintin_reporter( std::string str );
 	Tintin_reporter( Tintin_reporter const & src );
 	~Tintin_reporter( void );
-
-
 
 	void log(std::string	str);
 	void info(std::string	str);
