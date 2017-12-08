@@ -19,6 +19,8 @@ _socket(socket)
 	stream << " connected.";
 	this->_reporter->info(stream.str());
 	this->sendMsg(Connection::_GREETINGS);
+	this->_enablePrompt = true;
+	this->_enableMirror = false;
 	this->prompt();
 }
 
@@ -75,8 +77,16 @@ Connection::handleLine(std::string line) {
 	this->user(line.substr(5));
 	else if (line.compare(0, 4, "help") == 0)
 	this->help();
+	else if (line.compare(0, 6, "mirror") == 0)
+	this->_enableMirror = !this->_enableMirror;
+	else if (line.compare(0, 6, "prompt") == 0)
+	this->_enablePrompt = !this->_enablePrompt;
 	else if (!line.empty())
+	{
+		if (this->_enableMirror)
+		this->sendMsg(line);
 	this->log(line);
+}
 }
 
 void
@@ -115,15 +125,20 @@ Connection::sendMsg( std::string msg ){
 
 void
 Connection::prompt( void ) {
+	if (this->_enablePrompt){
 	std::string prompt = *this->_userName;
 	prompt.append("> ");
 	::send(this->_socket, prompt.c_str(), prompt.length(), 0);
+}
 }
 
 void
 Connection::help( void ){
 	this->sendMsg("quit: Stop the daemon.");
 	this->sendMsg("help: Display this message.");
+	this->sendMsg("user: Change username.");
+	this->sendMsg("prompt: Toggle on/off prompt.");
+	this->sendMsg("mirror: Toggle on/off mirror input.");
 }
 
 void		Connection::log(std::string	msg) {

@@ -5,6 +5,7 @@
 
 # include <string>
 # include <strings.h>
+# include <stdbool.h>
 # include <sstream>
 # include "Tintin_reporter.hpp"
 # include <sys/types.h>
@@ -28,6 +29,8 @@ class Connection {
 		void					prompt( void );
 		void					log( std::string msg);
 		std::string				*_userName;
+		bool					_enablePrompt;
+		bool					_enableMirror;
 
 		Tintin_reporter           *_reporter;
 		int                       _socket;
