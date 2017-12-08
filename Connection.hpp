@@ -11,13 +11,14 @@
 # include <sys/socket.h>
 # include <unistd.h>
 
+# include "Tintin_reporter.hpp"
 
 class Connection {
 
 	private:
 		Connection( Connection const & src );
 		Connection( void );
-		Connection &  operator=( Connection const & rhs );
+		Connection & operator=( Connection const & rhs );
 		void 					handleData(std::string data);
 		void 					handleLine( std::string line );
 		void 					sendMsg( std::string msg );
@@ -29,14 +30,15 @@ class Connection {
 		std::string				*_userName;
 
 		Tintin_reporter           *_reporter;
-    	int                       _socket;
+		int                       _socket;
 
 	public:
 		~Connection( void );
 		Connection( int socket, Tintin_reporter *reporter );
 		void handle( void );
-		static std::string const _GREETINGS;
-		static std::string const _QUIT;
+		static std::string const	_GREETINGS;
+		static std::string const	_QUIT;
+		static int const			EXIT_QUIT;
 
 };
 #endif

@@ -1,16 +1,18 @@
-
 #include <stdlib.h>
-# include "Connection.hpp"
+
+#include "Connection.hpp"
 
 
 const std::string	Connection::_GREETINGS = "Welcome to matt_daemon, type help to learn commands.";
 const std::string	Connection::_QUIT = "Stopping daemon, Bye!";
+int const			Connection::EXIT_QUIT = 42;
 
 
 
-Connection::Connection( int socket, Tintin_reporter *reporter ) {
-	this->_socket = socket;
-	this->_reporter = reporter;
+Connection::Connection( int socket, Tintin_reporter *reporter ) :
+_reporter(reporter),
+_socket(socket)
+{
 	std::stringstream stream;
 	stream << "client_"<< ::getpid();
 	this->_userName = new std::string(stream.str());
@@ -20,12 +22,11 @@ Connection::Connection( int socket, Tintin_reporter *reporter ) {
 	this->prompt();
 }
 
-void 		Connection::handle( void ) {
-
-	char	buffer[BUFF_SIZE];
-
-	std::string recv;
-	int 	receivedSize = 0;
+void
+Connection::handle( void ) {
+	char		buffer[BUFF_SIZE];
+	std::string	recv;
+	int 		receivedSize = 0;
 
 	::bzero(buffer, BUFF_SIZE);
 	while (
@@ -40,7 +41,6 @@ void 		Connection::handle( void ) {
 	)
 	{
 		recv.append(buffer, receivedSize);
-
 		if (receivedSize < BUFF_SIZE) {
 			this->handleData(recv);
 			recv.clear();
@@ -54,8 +54,8 @@ void 		Connection::handle( void ) {
 	exit(0);
 }
 
-
-void 		Connection::handleData(std::string data) {
+void
+Connection::handleData( std::string data ) {
 
 	size_t startPos = 0;
 	size_t endPos = 0;
@@ -64,10 +64,11 @@ void 		Connection::handleData(std::string data) {
 		this->handleLine(data.substr(startPos, endPos - startPos));
 		startPos = endPos + 1;
 	}
-
 }
 
-void 		Connection::handleLine(std::string line) {
+
+void
+Connection::handleLine(std::string line) {
 	if (line.compare(0, 4, "quit") == 0)
 	this->quit();
 	else if (line.compare(0, 5, "user ") == 0)
@@ -78,8 +79,8 @@ void 		Connection::handleLine(std::string line) {
 	this->log(line);
 }
 
-void		Connection::quit( void ){
-
+void
+Connection::quit( void ){
 	std::stringstream stream;
 	stream << *this->_userName << " request server to quit.";
 	this->_reporter->info(stream.str());
@@ -88,10 +89,11 @@ void		Connection::quit( void ){
 	stream.clear();
 	stream << *this->_userName << " disconnected.";
 	this->_reporter->info(stream.str());
-	exit(42);
+	exit(Connection::EXIT_QUIT);
 }
 
-void		Connection::user( std::string user){
+void
+Connection::user( std::string user){
 	if (!user.empty()){
 		std::stringstream stream;
 		stream << *this->_userName << " change username to " << user;
@@ -101,17 +103,20 @@ void		Connection::user( std::string user){
 	}
 }
 
-void 		Connection::sendMsg(std::string msg){
+void
+Connection::sendMsg( std::string msg ){
 	::send(this->_socket, (msg + '\n').c_str(), msg.length() + 1, 0);
 }
 
-void		Connection::prompt( void ) {
+void
+Connection::prompt( void ) {
 	std::string prompt = *this->_userName;
 	prompt.append("> ");
 	::send(this->_socket, prompt.c_str(), prompt.length(), 0);
 }
 
-void 		Connection::help( void ){
+void
+Connection::help( void ){
 	this->sendMsg("quit: Stop the daemon.");
 	this->sendMsg("help: Display this message.");
 }

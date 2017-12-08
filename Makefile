@@ -14,12 +14,12 @@ NAME = Matt_daemon
 
 CXX = g++
 
-FLAGS = -Wall
+FLAGS = -Wall -Wextra -Werror
 
 SRC =	test.cpp \
-			Tintin_reporter.cpp \
-			Connection.cpp \
-			Server.cpp
+		Tintin_reporter.cpp \
+		Connection.cpp \
+		Server.cpp
 
 OBJ = $(SRC:.cpp=.o)
 

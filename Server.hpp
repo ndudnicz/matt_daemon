@@ -3,10 +3,9 @@
 
 # include <signal.h>
 # include <list>
-
-# include "Tintin_reporter.hpp"
 #include <sys/file.h>
 
+# include "Tintin_reporter.hpp"
 
 # define DEFAULT_LISTENING_PORT	4242
 # define LISTEN_MAX				3
@@ -43,8 +42,6 @@
 # define LOG_SIGSYS "SIGSYS"
 # define LOG_SIGTRAP "SIGTRAP"
 
-# define EXIT_QUIT 42
-
 class Server {
 
 	private:
@@ -52,18 +49,18 @@ class Server {
 
 		int							_fdLock;
 		static unsigned int			_nChild;
-		static std::string const	_SERVERNAME;
 		static std::string const	_LOCKFILEDIR;
 		static std::string const	_LOCKFILENAME;
 		static std::string const	_LOGNAME;
-		Tintin_reporter				*reporter;
 		int							_socketMaster;
 		int							_inetAddr;
 		int							_port;
 		static std::list<int>		*_pidList;
+		static std::string const	_SERVERNAME;
 
 		static void					_erasePid( int pid );
 		static void					_killAllChilds( void );
+		static Tintin_reporter		*_reporter;
 
 	protected:
 
@@ -71,14 +68,15 @@ class Server {
 		Server( void );
 		~Server( void );
 
-		int	masterLoop( void );
-		void openConnection( void );
 
-		static void	signalHandler( int sig );
+		int					masterLoop( void );
+		void				openConnection( void );
+		static void			signalHandler( int sig );
+		Tintin_reporter		*getReporter( void );
 
 		Server &	operator=( Server const & rhs );
 
-	/* Exceptions ==============================================================*/
+	/* Exceptions ============================================================*/
 
 	class SyscallException : public std::exception {
 	private:
@@ -89,16 +87,6 @@ class Server {
 		SyscallException( SyscallException const & src ) throw();
 		~SyscallException( void ) throw();
 		virtual const char *what( void ) const throw();
-	};
-
-	class AlreadyRunningException : public std::exception {
-		public:
-			AlreadyRunningException();
-			~AlreadyRunningException();
-			AlreadyRunningException(AlreadyRunningException const &orig);
-			virtual const char* what() const throw();
-		private:
-			AlreadyRunningException	&operator=(AlreadyRunningException const &orig);
 	};
 
 };

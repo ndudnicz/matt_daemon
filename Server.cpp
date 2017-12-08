@@ -5,13 +5,13 @@
 #include <sys/socket.h>
 #include <netdb.h>
 #include <arpa/inet.h>
+#include <sys/wait.h>
 
 #include "Server.hpp"
 #include "Tintin_reporter.hpp"
 #include "Connection.hpp"
 #include "error.hpp"
 
-#include <sys/wait.h>
 
 /* STATIC VARIABLES ==========================================================*/
 
@@ -19,64 +19,70 @@ unsigned int		Server::_nChild = 0;
 std::string const	Server::_SERVERNAME ="matt_daemon";
 std::string const	Server::_LOCKFILEDIR = "/var/lock/";
 std::string const	Server::_LOCKFILENAME = Server::_LOCKFILEDIR +Server::_SERVERNAME + ".lock";
-std::string const	Server::_LOGNAME = "matt_daemon";
 std::list<int>		*Server::_pidList = new std::list<int>;
+Tintin_reporter		*Server::_reporter = NULL;
 
 /* CONSTRUCTORS ==============================================================*/
+
 Server::Server( void ) :
-reporter( new Tintin_reporter(Server::_LOGNAME) ),
 _socketMaster(0),
 _inetAddr(0),
 _port(0)
-// _pidList( new std::list<int> )
 {
+	int		pid = 0;
+
 	this->_fdLock = open(Server::_LOCKFILENAME.c_str(), O_CREAT, 0666);
 	if (flock(this->_fdLock, LOCK_EX | LOCK_NB)) {
-		throw Server::AlreadyRunningException();
+		std::cout << "Cannot acquire exclusive lock on /var/lock/matt_daemon.lock" << std::endl;
+		this->getReporter()->error("Error file locked.");
+		exit(EXIT_FAILURE);
+	} else {
+		pid = fork();
+		if (pid < 0) {
+			exit(EXIT_FAILURE);
+		} else if (pid == 0) {
+			this->getReporter()->info("Server Initialized");
+			signal(SIGHUP, &Server::signalHandler);
+			signal(SIGINT, &Server::signalHandler);
+			signal(SIGQUIT, &Server::signalHandler);
+			signal(SIGILL, &Server::signalHandler);
+			signal(SIGABRT, &Server::signalHandler);
+			signal(SIGFPE, &Server::signalHandler);
+			signal(SIGSEGV, &Server::signalHandler);
+			signal(SIGPIPE, &Server::signalHandler);
+			signal(SIGALRM, &Server::signalHandler);
+			signal(SIGTERM, &Server::signalHandler);
+			signal(SIGUSR1, &Server::signalHandler);
+			signal(SIGUSR2, &Server::signalHandler);
+			signal(SIGCHLD, &Server::signalHandler);
+			signal(SIGCONT, &Server::signalHandler);
+			signal(SIGTSTP, &Server::signalHandler);
+			signal(SIGTTIN, &Server::signalHandler);
+			signal(SIGTTOU, &Server::signalHandler);
+			signal(SIGBUS, &Server::signalHandler);
+			signal(SIGSTKFLT, &Server::signalHandler);
+			signal(SIGURG, &Server::signalHandler);
+			signal(SIGXCPU, &Server::signalHandler);
+			signal(SIGXFSZ, &Server::signalHandler);
+			signal(SIGVTALRM, &Server::signalHandler);
+			signal(SIGPROF, &Server::signalHandler);
+			signal(SIGWINCH, &Server::signalHandler);
+			signal(SIGIO, &Server::signalHandler);
+			signal(SIGPWR, &Server::signalHandler);
+			signal(SIGSYS, &Server::signalHandler);
+			signal(SIGTRAP, &Server::signalHandler);
+		} else {
+			exit(0);
+		}
 	}
-	this->reporter = new Tintin_reporter(Server::_SERVERNAME);
-	this->reporter->info("Server Initialized");
-	signal(SIGHUP, &Server::signalHandler);
-	signal(SIGINT, &Server::signalHandler);
-	signal(SIGQUIT, &Server::signalHandler);
-	signal(SIGILL, &Server::signalHandler);
-	signal(SIGABRT, &Server::signalHandler);
-	signal(SIGFPE, &Server::signalHandler);
-	signal(SIGSEGV, &Server::signalHandler);
-	signal(SIGPIPE, &Server::signalHandler);
-	signal(SIGALRM, &Server::signalHandler);
-	signal(SIGTERM, &Server::signalHandler);
-	signal(SIGUSR1, &Server::signalHandler);
-	signal(SIGUSR2, &Server::signalHandler);
-	signal(SIGCHLD, &Server::signalHandler);
-	signal(SIGCONT, &Server::signalHandler);
-	signal(SIGTSTP, &Server::signalHandler);
-	signal(SIGTTIN, &Server::signalHandler);
-	signal(SIGTTOU, &Server::signalHandler);
-	signal(SIGBUS, &Server::signalHandler);
-	signal(SIGSTKFLT, &Server::signalHandler);
-	signal(SIGURG, &Server::signalHandler);
-	signal(SIGXCPU, &Server::signalHandler);
-	signal(SIGXFSZ, &Server::signalHandler);
-	signal(SIGVTALRM, &Server::signalHandler);
-	signal(SIGPROF, &Server::signalHandler);
-	signal(SIGWINCH, &Server::signalHandler);
-	signal(SIGIO, &Server::signalHandler);
-	signal(SIGPWR, &Server::signalHandler);
-	signal(SIGSYS, &Server::signalHandler);
-	signal(SIGTRAP, &Server::signalHandler);
 }
 
-Server::Server( Server const & src ) {}
-
-Server::AlreadyRunningException::AlreadyRunningException(){}
-Server::AlreadyRunningException::AlreadyRunningException( AlreadyRunningException const &orig){
-	(void) orig;
-}
+// Server::Server( Server const & src ) {}
 Server::SyscallException::SyscallException( void ) throw() {}
-Server::SyscallException::SyscallException( SyscallException const & src ) throw() {}
+// Server::SyscallException::SyscallException( SyscallException const & src ) throw() {}
 
 /* MEMBER OPERATORS OVERLOAD =================================================*/
+
 Server		&Server::operator=( Server const & rhs ) {
 	(void)rhs;
 	return *this;
@@ -84,11 +90,11 @@ Server		&Server::operator=( Server const & rhs ) {
 
 
 /* DESTRUCTOR ================================================================*/
+
 Server::~Server( void ) {
 	flock(this->_fdLock, LOCK_UN);
 }
 Server::SyscallException::~SyscallException( void ) {}
-Server::AlreadyRunningException::~AlreadyRunningException( void ) {}
 
 
 /* MEMBER FUNCTIONS ==========================================================*/
@@ -97,40 +103,33 @@ Server::AlreadyRunningException::~AlreadyRunningException( void ) {}
 */
 void
 Server::openConnection( void ) {
-	struct protoent			*proto;
+	struct protoent		*proto;
 	struct sockaddr_in	 sin;
-	// struct timeval			 timeout;
-	int									enable;
+	int					enable;
 
 	enable = 1;
-	// timeout.tv_sec = 10;
-	// timeout.tv_usec = 0;
 	sin.sin_port = htons((unsigned short)DEFAULT_LISTENING_PORT);
 	// ntohs(sin.sin_port);
 	if ((proto = getprotobyname("tcp")) == 0) {
-		this->reporter->error(GPBN_FAIL);
+		Server::_reporter->error(GPBN_FAIL);
 		throw Server::SyscallException();
 	}
 	if ((this->_socketMaster = socket(PF_INET, SOCK_STREAM, proto->p_proto)) < 0) {
-		this->reporter->error(SOCKET_FAILED);
+		Server::_reporter->error(SOCKET_FAILED);
 		throw Server::SyscallException();
 	}
 	if (setsockopt(this->_socketMaster, SOL_SOCKET, SO_REUSEADDR, &enable, sizeof(enable)) < 0) {
-		this->reporter->error(SETSOCKOPT_FAILED);
+		Server::_reporter->error(SETSOCKOPT_FAILED);
 		throw Server::SyscallException();
 	}
 	sin.sin_family = AF_INET;
 	sin.sin_addr.s_addr = htonl(INADDR_ANY);
-	// if ((sin.sin_addr.s_addr = htonl(INADDR_ANY))== INADDR_NONE) {
-	// 	this->reporter->error(INET_ADDR_FAILED);
-	// 	throw Server::SyscallException();
-	// }
 	if (bind(this->_socketMaster, (const struct sockaddr*)&sin, sizeof(sin)) < 0) {
-		this->reporter->error(BIND_FAILED);
+		Server::_reporter->error(BIND_FAILED);
 		throw Server::SyscallException();
 	}
 	if (listen(this->_socketMaster, LISTEN_MAX) < 0) {
-		this->reporter->error(LISTEN_FAILED);
+		Server::_reporter->error(LISTEN_FAILED);
 		throw Server::SyscallException();
 	}
 	this->_inetAddr = sin.sin_addr.s_addr;
@@ -147,19 +146,17 @@ Server::masterLoop(void) {
 	cslen = sizeof(csin);
 	while ((newSocket = accept(this->_socketMaster, (struct sockaddr*)&csin, &cslen)))
 	{
-		std::cout << "list:" << Server::_pidList->size() << '\n';
 		if (Server::_nChild < 3) {
 			pid = fork();
 			if (newSocket > 0 && pid == 0) {
-				Connection *connect = new Connection(newSocket, this->reporter);
+				Connection *connect = new Connection(newSocket, Server::_reporter);
 				connect->handle();
 			} else if (newSocket > 0 && pid) {
-				/* PARENT */
 				Server::_nChild += 1;
 				Server::_pidList->push_front(pid);
-				std::cout << "add child, nChild = " << Server::_nChild << std::endl;
 			}
 		} else {
+			close(newSocket);
 			std::cout << "nope, too many child :D" << std::endl;
 		}
 	}
@@ -188,133 +185,120 @@ void
 Server::signalHandler( int sig ) {
 	int	stat_loc;
 	int	pid;
-	std::cout << getpid() << " ";
+	if (sig != SIGCHLD) {
+		Server::_reporter->info( "Signal handler." );
+	}
 	switch (sig) {
 		case SIGHUP:
-		std::cout << LOG_SIGHUP << std::endl;
+		// std::cout << LOG_SIGHUP << std::endl;
 		exit(0);
 		break;
 		case SIGINT:
-		std::cout << LOG_SIGINT << std::endl;
+		// std::cout << LOG_SIGINT << std::endl;
 		exit(0);
 		break;
 		case SIGQUIT:
-		std::cout << LOG_SIGQUIT << std::endl;
+		// std::cout << LOG_SIGQUIT << std::endl;
 		exit(0);
 		break;
 		case SIGILL:
-		std::cout << LOG_SIGILL << std::endl;
+		// std::cout << LOG_SIGILL << std::endl;
 		exit(0);
 		break;
 		case SIGABRT:
-		std::cout << LOG_SIGABRT << std::endl;
+		// std::cout << LOG_SIGABRT << std::endl;
 		exit(0);
 		break;
 		case SIGFPE:
-		std::cout << LOG_SIGFPE << std::endl;
+		// std::cout << LOG_SIGFPE << std::endl;
 		exit(0);
 		break;
 		case SIGSEGV:
-		std::cout << LOG_SIGSEGV << std::endl;
+		// std::cout << LOG_SIGSEGV << std::endl;
 		exit(0);
 		break;
 		case SIGPIPE:
-		std::cout << LOG_SIGPIPE << std::endl;
+		// std::cout << LOG_SIGPIPE << std::endl;
 		exit(0);
 		break;
 		case SIGALRM:
-		std::cout << LOG_SIGALRM << std::endl;
+		// std::cout << LOG_SIGALRM << std::endl;
 		exit(0);
 		break;
 		case SIGTERM:
-		std::cout << LOG_SIGTERM << std::endl;
+		// std::cout << LOG_SIGTERM << std::endl;
 		exit(0);
 		break;
 		case SIGUSR1:
-		// std::cout << LOG_SIGUSR1 << std::endl;
-		// exit(EXIT_QUIT);
 		break;
 		case SIGUSR2:
-		// std::cout << LOG_SIGUSR2 << std::endl;
-		// exit(0);
 		break;
 		case SIGCHLD:
-		std::cout << LOG_SIGCHLD << std::endl;
 		pid = wait(&stat_loc);
-		if (WIFEXITED(stat_loc) && WEXITSTATUS(stat_loc) == EXIT_QUIT) {
+		if (WIFEXITED(stat_loc) && WEXITSTATUS(stat_loc) == Connection::EXIT_QUIT) {
 			Server::_killAllChilds();
+			Server::_reporter->info("Quitting.");
 			exit(0);
 		} else {
 			Server::_erasePid( pid );
+			Server::_reporter->info( "Signal handler." );
 			Server::_nChild -= Server::_nChild > 0 ? 1 : 0;
 		}
-		// std::cout << "del child, nChild = " << Server::_nChild << std::endl;
 		break;
 		case SIGKILL:
-		std::cout << "KILLLL" << std::endl;
 		exit(0);
 		break;
 		case SIGSTKFLT:
-		std::cout << LOG_SIGSTKFLT << std::endl;
 		exit(0);
 		break;
 		case SIGURG:
-		std::cout << LOG_SIGURG << std::endl;
 		exit(0);
 		break;
 		case SIGXCPU:
-		std::cout << LOG_SIGXCPU << std::endl;
 		exit(0);
 		break;
 		case SIGXFSZ:
-		std::cout << LOG_SIGXFSZ << std::endl;
 		exit(0);
 		break;
 		case SIGVTALRM:
-		std::cout << LOG_SIGVTALRM << std::endl;
 		exit(0);
 		break;
 		case SIGPROF:
-		std::cout << LOG_SIGPROF << std::endl;
 		exit(0);
 		break;
 		case SIGWINCH:
-		std::cout << LOG_SIGWINCH << std::endl;
 		exit(0);
 		break;
 		case SIGIO:
-		std::cout << LOG_SIGIO << std::endl;
 		exit(0);
 		break;
 		case SIGPWR:
-		std::cout << LOG_SIGPWR << std::endl;
 		exit(0);
 		break;
 		case SIGSYS:
-		std::cout << LOG_SIGSYS << std::endl;
 		exit(0);
 		break;
 		case SIGTRAP:
-		std::cout << LOG_SIGTRAP << std::endl;
 		exit(0);
 		break;
 		default:
-		std::cout << "UNKNOWN" << std::endl;
-		// exit(0);
 		break;
 	}
 }
 
+Tintin_reporter*
+Server::getReporter( void ) {
+	if (Server::_reporter == NULL) {
+		Server::_reporter = new Tintin_reporter( Server::_SERVERNAME );
+	}
+	return (Server::_reporter);
+}
 
 const char*
 Server::SyscallException::what( void ) const throw() {
 	return ("");
 }
 
-const char *
-Server::AlreadyRunningException::what() const throw(){
-	return ("Cannot acquire exclusive lock on /var/lock/matt_daemon.lock");
-}
 /* NON MEMBER FUNCTIONS ======================================================*/
 
 
