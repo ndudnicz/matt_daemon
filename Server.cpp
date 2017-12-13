@@ -28,9 +28,7 @@ unsigned int		Server::_nClients = 3;
 /* CONSTRUCTORS ==============================================================*/
 
 Server::Server( void ) :
-_socketMaster(0),
-_inetAddr(0),
-_port(0)
+_socketMaster(0)
 {
 	int		pid = 0;
 
@@ -74,6 +72,7 @@ _port(0)
 			signal(SIGPWR, &Server::signalHandler);
 			signal(SIGSYS, &Server::signalHandler);
 			signal(SIGTRAP, &Server::signalHandler);
+			signal(SIGKILL, &Server::signalHandler);
 		} else {
 			exit(0);
 		}
@@ -89,14 +88,12 @@ Server		&Server::operator=( Server const & rhs ) {
 	return *this;
 }
 
-
 /* DESTRUCTOR ================================================================*/
 
 Server::~Server( void ) {
 	flock(this->_fdLock, LOCK_UN);
 }
 Server::SyscallException::~SyscallException( void ) {}
-
 
 /* MEMBER FUNCTIONS ==========================================================*/
 
@@ -131,8 +128,6 @@ Server::openConnection( void ) {
 		Server::_reporter->error(LISTEN_FAILED);
 		throw Server::SyscallException();
 	}
-	this->_inetAddr = sin.sin_addr.s_addr;
-	this->_port = sin.sin_port;
 }
 
 int
@@ -192,43 +187,6 @@ Server::signalHandler( int sig ) {
 		Server::_reporter->info( "Signal handler." );
 	}
 	switch (sig) {
-		case SIGHUP:
-		exit(0);
-		break;
-		case SIGINT:
-		Server::_dellock();
-		exit(0);
-		break;
-		case SIGQUIT:
-		exit(0);
-		break;
-		case SIGILL:
-		exit(0);
-		break;
-		case SIGABRT:
-		exit(0);
-		break;
-		case SIGFPE:
-		exit(0);
-		break;
-		case SIGSEGV:
-		exit(0);
-		break;
-		case SIGPIPE:
-		exit(0);
-		break;
-		case SIGALRM:
-		exit(0);
-		break;
-		case SIGTERM:
-		exit(0);
-		break;
-		case SIGUSR1:
-		exit(0);
-		break;
-		case SIGUSR2:
-		exit(0);
-		break;
 		case SIGCHLD:
 		while (1) {
 			pid = waitpid(-1, &stat_loc, WNOHANG);
@@ -246,43 +204,8 @@ Server::signalHandler( int sig ) {
 			}
 		}
 		break;
-		case SIGKILL:
-		exit(0);
-		break;
-		case SIGSTKFLT:
-		exit(0);
-		break;
-		case SIGURG:
-		exit(0);
-		break;
-		case SIGXCPU:
-		exit(0);
-		break;
-		case SIGXFSZ:
-		exit(0);
-		break;
-		case SIGVTALRM:
-		exit(0);
-		break;
-		case SIGPROF:
-		exit(0);
-		break;
-		case SIGWINCH:
-		exit(0);
-		break;
-		case SIGIO:
-		exit(0);
-		break;
-		case SIGPWR:
-		exit(0);
-		break;
-		case SIGSYS:
-		exit(0);
-		break;
-		case SIGTRAP:
-		exit(0);
-		break;
 		default:
+		Server::_dellock();
 		exit(0);
 		break;
 	}
@@ -290,12 +213,7 @@ Server::signalHandler( int sig ) {
 
 void
 Server::_dellock( void ) {
-	char	*s = new char[Server::_LOCKFILENAME.size()];
-	for (size_t i = 0; i < Server::_LOCKFILENAME.size(); i++) {
-		s[i] = Server::_LOCKFILENAME[i];
-	}
-	s[Server::_LOCKFILENAME.size()] = 0;
-	unlink(s);
+	unlink(Server::_LOCKFILENAME.c_str());
 }
 
 Tintin_reporter*
