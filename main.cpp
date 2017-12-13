@@ -1,42 +1,27 @@
-/* ************************************************************************** */
-/*                                                                            */
-/*                                                        :::      ::::::::   */
-/*   main.cpp                                           :+:      :+:    :+:   */
-/*                                                    +:+ +:+         +:+     */
-/*   By: tmanet <tmanet@student.42.fr>              +#+  +:+       +#+        */
-/*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2017/12/06 09:16:36 by tmanet            #+#    #+#             */
-/*   Updated: 2017/12/06 22:31:37 by tmanet           ###   ########.fr       */
-/*                                                                            */
-/* ************************************************************************** */
-
 #include <unistd.h>
 #include <stdlib.h>
 #include <iostream>
-#include <signal.h>
+#include <sys/wait.h>
 
 #include "Server.hpp"
-#include "Tintin_reporter.hpp"
 
-void  ft(int sig) {
-  std::cout << "INTERRUPT!" << '\n';
-  exit(0);
-}
-
-int	main()
+int	main( void )
 {
-  int  pid = 0;
-
-  pid = fork();
-  if (pid < 0)
-    exit(EXIT_FAILURE);
-  else if (pid == 0) {
-    Server  *s = new Server();
-    s->run();
-    while (1);
-  } else {
-    exit(0);
-  }
-  std::cout << "return main" << '\n';
-	return 0;
+	if (getuid()) {
+		std::cout << "Permission denied. Run as root." << std::endl;
+		return (1);
+	} else {
+		if (fork() > 0) {
+			exit(0);
+		} else {
+			Server	*s = new Server();
+			try {
+				s->openConnection();
+				s->masterLoop();
+			} catch (Server::SyscallException & e) {
+				exit(EXIT_FAILURE);
+			}
+			return 0;
+		}
+	}
 }

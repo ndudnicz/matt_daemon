@@ -8,6 +8,7 @@
 #include <sys/wait.h>
 #include <sstream>
 #include <string.h>
+// #include <asm-generic/signal.h>
 
 #include "Server.hpp"
 #include "Tintin_reporter.hpp"
@@ -33,46 +34,26 @@ _socketMaster(0)
 	int		pid = 0;
 
 	this->_fdLock = open(Server::_LOCKFILENAME.c_str(), O_CREAT, 0666);
+	if (chdir("/") < 0) {
+		this->getReporter()->error("chdir() failed.");
+		exit(EXIT_FAILURE);
+	}
 	if (flock(this->_fdLock, LOCK_EX | LOCK_NB)) {
 		std::cout << "Cannot acquire exclusive lock on /var/lock/matt_daemon.lock" << std::endl;
 		this->getReporter()->error("Error file locked.");
 		exit(EXIT_FAILURE);
 	} else {
+		if (setsid() < 0) {
+			this->getReporter()->error("setsid() failed.");
+		}
 		pid = fork();
 		if (pid < 0) {
 			exit(EXIT_FAILURE);
 		} else if (pid == 0) {
 			this->getReporter()->info("Server Initialized");
-			signal(SIGHUP, &Server::signalHandler);
-			signal(SIGINT, &Server::signalHandler);
-			signal(SIGQUIT, &Server::signalHandler);
-			signal(SIGILL, &Server::signalHandler);
-			signal(SIGABRT, &Server::signalHandler);
-			signal(SIGFPE, &Server::signalHandler);
-			signal(SIGSEGV, &Server::signalHandler);
-			signal(SIGPIPE, &Server::signalHandler);
-			signal(SIGALRM, &Server::signalHandler);
-			signal(SIGTERM, &Server::signalHandler);
-			signal(SIGUSR1, &Server::signalHandler);
-			signal(SIGUSR2, &Server::signalHandler);
-			signal(SIGCHLD, &Server::signalHandler);
-			signal(SIGCONT, &Server::signalHandler);
-			signal(SIGTSTP, &Server::signalHandler);
-			signal(SIGTTIN, &Server::signalHandler);
-			signal(SIGTTOU, &Server::signalHandler);
-			signal(SIGBUS, &Server::signalHandler);
-			signal(SIGSTKFLT, &Server::signalHandler);
-			signal(SIGURG, &Server::signalHandler);
-			signal(SIGXCPU, &Server::signalHandler);
-			signal(SIGXFSZ, &Server::signalHandler);
-			signal(SIGVTALRM, &Server::signalHandler);
-			signal(SIGPROF, &Server::signalHandler);
-			signal(SIGWINCH, &Server::signalHandler);
-			signal(SIGIO, &Server::signalHandler);
-			signal(SIGPWR, &Server::signalHandler);
-			signal(SIGSYS, &Server::signalHandler);
-			signal(SIGTRAP, &Server::signalHandler);
-			signal(SIGKILL, &Server::signalHandler);
+			for (int i = 1; i <= _NSIG; i++) {
+				signal(i, &Server::signalHandler);
+			}
 		} else {
 			exit(0);
 		}
@@ -205,6 +186,10 @@ Server::signalHandler( int sig ) {
 		}
 		break;
 		default:
+		std::stringstream	msg;
+		msg << "Signal handler: " << std::to_string(sig) << std::endl;
+		Server::_reporter->error(msg.str());
+		Server::_killAllChilds();
 		Server::_dellock();
 		exit(0);
 		break;
