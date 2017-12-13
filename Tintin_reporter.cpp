@@ -24,17 +24,14 @@ void	Tintin_reporter::log(std::string str){
 }
 
 void	Tintin_reporter::info(std::string str){
-
 	this->write("INFO", str);
 }
 
 void	Tintin_reporter::warning(std::string str){
-
 	this->write("WARNING", str);
 }
 
 void	Tintin_reporter::error(std::string str){
-
 	this->write("ERROR", str);
 }
 
@@ -51,7 +48,6 @@ Tintin_reporter	 &Tintin_reporter::setFilename(std::string fn){
 	mkdir(("/var/log/" + fn).c_str(), 0640);
 	std::string fullPath = "/var/log/" + fn + "/" + fn + ".log";
 	this->file = std::ofstream(fullPath, std::ios::out | std::ios::app);
-
 	return *this;
 }
 

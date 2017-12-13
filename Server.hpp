@@ -10,37 +10,36 @@
 # define DEFAULT_LISTENING_PORT	4242
 # define LISTEN_MAX				3
 
-/* http://man7.org/linux/man-pages/man7/signal.7.html */
 
-# define LOG_SIGHUP "SIGHUP"
-# define LOG_SIGINT "SIGINT"
-# define LOG_SIGQUIT "SIGQUIT"
-# define LOG_SIGILL "SIGILL"
-# define LOG_SIGABRT "SIGABRT"
-# define LOG_SIGFPE "SIGFPE"
-# define LOG_SIGSEGV "SIGSEGV"
-# define LOG_SIGPIPE "SIGPIPE"
-# define LOG_SIGALRM "SIGALRM"
-# define LOG_SIGTERM "SIGTERM"
-# define LOG_SIGUSR1 "SIGUSR1"
-# define LOG_SIGUSR2 "SIGUSR2"
-# define LOG_SIGCHLD "SIGCHLD"
-# define LOG_SIGCONT "SIGCONT"
-# define LOG_SIGTSTP "SIGTSTP"
-# define LOG_SIGTTIN "SIGTTIN"
-# define LOG_SIGTTOU "SIGTTOU"
-# define LOG_SIGBUS "SIGBUS"
-# define LOG_SIGSTKFLT "SIGSTKFLT"
-# define LOG_SIGURG "SIGURG"
-# define LOG_SIGXCPU "SIGXCPU"
-# define LOG_SIGXFSZ "SIGXFSZ"
-# define LOG_SIGVTALRM "SIGVTALRM"
-# define LOG_SIGPROF "SIGPROF"
-# define LOG_SIGWINCH "SIGWINCH"
-# define LOG_SIGIO "SIGIO"
-# define LOG_SIGPWR "SIGPWR"
-# define LOG_SIGSYS "SIGSYS"
-# define LOG_SIGTRAP "SIGTRAP"
+// # define LOG_SIGHUP "SIGHUP"
+// # define LOG_SIGINT "SIGINT"
+// # define LOG_SIGQUIT "SIGQUIT"
+// # define LOG_SIGILL "SIGILL"
+// # define LOG_SIGABRT "SIGABRT"
+// # define LOG_SIGFPE "SIGFPE"
+// # define LOG_SIGSEGV "SIGSEGV"
+// # define LOG_SIGPIPE "SIGPIPE"
+// # define LOG_SIGALRM "SIGALRM"
+// # define LOG_SIGTERM "SIGTERM"
+// # define LOG_SIGUSR1 "SIGUSR1"
+// # define LOG_SIGUSR2 "SIGUSR2"
+// # define LOG_SIGCHLD "SIGCHLD"
+// # define LOG_SIGCONT "SIGCONT"
+// # define LOG_SIGTSTP "SIGTSTP"
+// # define LOG_SIGTTIN "SIGTTIN"
+// # define LOG_SIGTTOU "SIGTTOU"
+// # define LOG_SIGBUS "SIGBUS"
+// # define LOG_SIGSTKFLT "SIGSTKFLT"
+// # define LOG_SIGURG "SIGURG"
+// # define LOG_SIGXCPU "SIGXCPU"
+// # define LOG_SIGXFSZ "SIGXFSZ"
+// # define LOG_SIGVTALRM "SIGVTALRM"
+// # define LOG_SIGPROF "SIGPROF"
+// # define LOG_SIGWINCH "SIGWINCH"
+// # define LOG_SIGIO "SIGIO"
+// # define LOG_SIGPWR "SIGPWR"
+// # define LOG_SIGSYS "SIGSYS"
+// # define LOG_SIGTRAP "SIGTRAP"
 
 class Server {
 
@@ -61,6 +60,7 @@ class Server {
 
 		static void					_erasePid( int pid );
 		static void					_killAllChilds( void );
+		static void					_dellock( void );
 		static Tintin_reporter		*_reporter;
 
 	protected:

@@ -7,6 +7,7 @@
 #include <arpa/inet.h>
 #include <sys/wait.h>
 #include <sstream>
+#include <string.h>
 
 #include "Server.hpp"
 #include "Tintin_reporter.hpp"
@@ -79,9 +80,7 @@ _port(0)
 	}
 }
 
-// Server::Server( Server const & src ) {}
 Server::SyscallException::SyscallException( void ) throw() {}
-// Server::SyscallException::SyscallException( SyscallException const & src ) throw() {}
 
 /* MEMBER OPERATORS OVERLOAD =================================================*/
 
@@ -100,9 +99,7 @@ Server::SyscallException::~SyscallException( void ) {}
 
 
 /* MEMBER FUNCTIONS ==========================================================*/
-/*
-** Open a connection on port 4242
-*/
+
 void
 Server::openConnection( void ) {
 	struct protoent		*proto;
@@ -187,6 +184,8 @@ Server::_killAllChilds( void ) {
 
 void
 Server::signalHandler( int sig ) {
+	/* http://man7.org/linux/man-pages/man7/signal.7.html */
+
 	int	stat_loc = 0;
 	int	pid = 0;
 	if (sig != SIGCHLD) {
@@ -197,6 +196,7 @@ Server::signalHandler( int sig ) {
 		exit(0);
 		break;
 		case SIGINT:
+		Server::_dellock();
 		exit(0);
 		break;
 		case SIGQUIT:
@@ -224,8 +224,10 @@ Server::signalHandler( int sig ) {
 		exit(0);
 		break;
 		case SIGUSR1:
+		exit(0);
 		break;
 		case SIGUSR2:
+		exit(0);
 		break;
 		case SIGCHLD:
 		while (1) {
@@ -237,10 +239,10 @@ Server::signalHandler( int sig ) {
 			if (WIFEXITED(stat_loc) && WEXITSTATUS(stat_loc) == Connection::EXIT_QUIT) {
 				Server::_killAllChilds();
 				Server::_reporter->info("Quitting.");
+				Server::_dellock();
 				exit(0);
 			} else {
 				Server::_erasePid( pid );
-				// Server::_reporter->info( "Signal handler." );
 			}
 		}
 		break;
@@ -269,7 +271,6 @@ Server::signalHandler( int sig ) {
 		exit(0);
 		break;
 		case SIGIO:
-		std::cout << "SIGIO " << getpid() << '\n';
 		exit(0);
 		break;
 		case SIGPWR:
@@ -282,8 +283,19 @@ Server::signalHandler( int sig ) {
 		exit(0);
 		break;
 		default:
+		exit(0);
 		break;
 	}
+}
+
+void
+Server::_dellock( void ) {
+	char	*s = new char[Server::_LOCKFILENAME.size()];
+	for (size_t i = 0; i < Server::_LOCKFILENAME.size(); i++) {
+		s[i] = Server::_LOCKFILENAME[i];
+	}
+	s[Server::_LOCKFILENAME.size()] = 0;
+	unlink(s);
 }
 
 Tintin_reporter*
