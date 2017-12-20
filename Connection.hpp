@@ -28,6 +28,8 @@ class Connection {
 		void 					user( std::string user );
 		void					prompt( void );
 		void					log( std::string msg);
+		void					toggleMirror( void );
+		void					togglePrompt( void );
 		std::string				*_userName;
 		bool					_enablePrompt;
 		bool					_enableMirror;

@@ -74,15 +74,15 @@ Connection::_handleLine(std::string line) {
 	else if (line.compare(0, 4, "help") == 0)
 	this->help();
 	else if (line.compare(0, 6, "mirror") == 0)
-	this->_enableMirror = !this->_enableMirror;
+	this->toggleMirror();
 	else if (line.compare(0, 6, "prompt") == 0)
-	this->_enablePrompt = !this->_enablePrompt;
+	this->togglePrompt();
 	else if (!line.empty())
 	{
 		if (this->_enableMirror)
 		this->sendMsg(line);
-	this->log(line);
-}
+		this->log(line);
+	}
 }
 
 void
@@ -102,16 +102,16 @@ void
 Connection::user( std::string user){
 	std::string::size_type nameStart = user.find_first_not_of(" \t\n");
 	if (nameStart != std::string::npos){
-	std::string::size_type nameEnd = user.find_last_not_of(" \t\n");
-	user = user.substr(nameStart, nameEnd - nameStart + 1);
-	if (!user.empty()){
-		std::stringstream stream;
-		stream << *this->_userName << " change username to " << user;
-		this->_reporter->info(stream.str());
-		delete(this->_userName);
-		this->_userName = new std::string(user);
+		std::string::size_type nameEnd = user.find_last_not_of(" \t\n");
+		user = user.substr(nameStart, nameEnd - nameStart + 1);
+		if (!user.empty()){
+			std::stringstream stream;
+			stream << *this->_userName << " change username to " << user;
+			this->_reporter->info(stream.str());
+			delete(this->_userName);
+			this->_userName = new std::string(user);
+		}
 	}
-}
 }
 
 void
@@ -122,10 +122,10 @@ Connection::sendMsg( std::string msg ){
 void
 Connection::prompt( void ) {
 	if (this->_enablePrompt){
-	std::string prompt = *this->_userName;
-	prompt.append("> ");
-	::send(this->_socket, prompt.c_str(), prompt.length(), 0);
-}
+		std::string prompt = *this->_userName;
+		prompt.append("> ");
+		::send(this->_socket, prompt.c_str(), prompt.length(), 0);
+	}
 }
 
 void
@@ -142,4 +142,28 @@ Connection::log( std::string msg ) {
 	std::stringstream stream;
 	stream << *this->_userName << ": " << msg;
 	this->_reporter->log(stream.str());
+}
+
+void
+Connection::toggleMirror( void ) {
+	this->_enableMirror = !this->_enableMirror;
+	std::stringstream stream;
+	stream << *this->_userName << " toggle mirror ";
+	if (this->_enableMirror)
+	stream << "on";
+	else
+	stream << "off";
+	this->_reporter->info(stream.str());
+}
+
+void
+Connection::togglePrompt( void ) {
+	this->_enablePrompt = !this->_enablePrompt;
+	std::stringstream stream;
+	stream << *this->_userName << " toggle prompt ";
+	if (this->_enablePrompt)
+	stream << "on";
+	else
+	stream << "off";
+	this->_reporter->info(stream.str());
 }
