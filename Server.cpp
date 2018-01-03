@@ -171,7 +171,7 @@ Server::signalHandler( int sig ) {
 		case SIGCHLD:
 		while (1) {
 			pid = waitpid(-1, &stat_loc, WNOHANG);
-			if (pid < 0) {
+			if (pid <= 0) {
 				break ;
 			}
 			Server::_nChild -= Server::_nChild > 0 ? 1 : 0;

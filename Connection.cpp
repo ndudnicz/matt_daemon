@@ -50,6 +50,7 @@ Connection::handle( void ) {
 	std::stringstream stream;
 	stream << *this->_userName << " disconnected.";
 	this->_reporter->info(stream.str());
+	close(this->_socket);
 	exit(0);
 }
 
