@@ -8,7 +8,6 @@
 #include <sys/wait.h>
 #include <sstream>
 #include <string.h>
-// #include <asm-generic/signal.h>
 
 #include "Server.hpp"
 #include "Tintin_reporter.hpp"
